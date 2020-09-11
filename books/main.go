@@ -3,7 +3,15 @@ package main
 import (
 	"fmt"
 	"librarymanager/books/domain"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
+
+type BookPayload struct {
+	Title string `json:"title"`
+	Year  int    `json:"year"`
+}
 
 func main() {
 
@@ -15,8 +23,40 @@ func main() {
 
 	usecase := domain.NewBookUsecase(repository)
 
-	//usecase.AddOne("some title", 2020)
+	r := gin.Default()
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 
-	book, _ := usecase.GetByID("w7eo7Lq7jgykVvVS")
-	fmt.Print(book)
+	r.GET("/books/:id", func(c *gin.Context) {
+		book, _ := usecase.GetByID(c.Param("id"))
+		c.JSON(200, book)
+	})
+
+	r.GET("/books", func(c *gin.Context) {
+		books, _ := usecase.All()
+		c.JSON(200, books)
+	})
+
+	r.POST("/books", func(c *gin.Context) {
+
+		bookPayload := BookPayload{}
+		if err := c.BindJSON(&bookPayload); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		book, err := usecase.AddOne(bookPayload.Title, bookPayload.Year)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(201, book)
+
+	})
+
+	r.Run()
 }

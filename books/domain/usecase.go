@@ -4,6 +4,7 @@ package domain
 type Usecase interface {
 	AddOne(title string, year int) (Book, error)
 	GetByID(id string) (Book, error)
+	All() ([]Book, error)
 }
 
 type usecaseStruct struct {
@@ -21,15 +22,17 @@ func NewBookUsecase(repository Repository) Usecase {
 //AddOne method
 func (u *usecaseStruct) AddOne(title string, year int) (Book, error) {
 
-	book, err := u.repository.Save(title, year)
-
-	return book, err
+	return u.repository.Save(title, year)
 }
 
 //GetByID method
 func (u *usecaseStruct) GetByID(id string) (Book, error) {
 
-	book, err := u.repository.Get(id)
+	return u.repository.Get(id)
+}
 
-	return book, err
+//All method
+func (u *usecaseStruct) All() ([]Book, error) {
+
+	return u.repository.All()
 }

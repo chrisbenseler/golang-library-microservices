@@ -24,6 +24,10 @@ func (m *mockRepository) Get(id string) (domain.Book, error) {
 	return domain.Book{}, nil
 }
 
+func (m *mockRepository) All() ([]domain.Book, error) {
+	return []domain.Book{}, nil
+}
+
 func Test_usecase(t *testing.T) {
 
 	repository := mockRepository{}
