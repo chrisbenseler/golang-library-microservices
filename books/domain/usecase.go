@@ -1,10 +1,9 @@
 package domain
 
-import "errors"
-
 //Usecase books use case interface
 type Usecase interface {
-	AddOne(title string, year int) error
+	AddOne(title string, year int) (Book, error)
+	GetByID(id string) (Book, error)
 }
 
 type usecaseStruct struct {
@@ -20,8 +19,17 @@ func NewBookUsecase(repository Repository) Usecase {
 }
 
 //AddOne method
-func (u *usecaseStruct) AddOne(title string, year int) error {
+func (u *usecaseStruct) AddOne(title string, year int) (Book, error) {
 
-	u.repository.Save(title, year)
-	return errors.New("Could not create new book")
+	book, err := u.repository.Save(title, year)
+
+	return book, err
+}
+
+//GetByID method
+func (u *usecaseStruct) GetByID(id string) (Book, error) {
+
+	book, err := u.repository.Get(id)
+
+	return book, err
 }

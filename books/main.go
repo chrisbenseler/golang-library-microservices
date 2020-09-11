@@ -15,6 +15,8 @@ func main() {
 
 	usecase := domain.NewBookUsecase(repository)
 
-	usecase.AddOne("some title", 2020)
+	//usecase.AddOne("some title", 2020)
 
+	book, _ := usecase.GetByID("w7eo7Lq7jgykVvVS")
+	fmt.Print(book)
 }
