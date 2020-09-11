@@ -2,7 +2,6 @@ package domain
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -76,7 +75,6 @@ func (r *repositoryStruct) All() ([]Book, error) {
 	err := filepath.Walk("./data/", func(path string, info os.FileInfo, err error) error {
 
 		if strings.Contains(path, ".json") == true {
-			fmt.Print(path)
 			files = append(files, path)
 		}
 		return nil

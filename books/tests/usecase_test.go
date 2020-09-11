@@ -47,3 +47,17 @@ func Test_usecase(t *testing.T) {
 	}
 
 }
+
+func Test_usecaseBlank(t *testing.T) {
+
+	repository := mockRepository{}
+
+	usecase := domain.NewBookUsecase(&repository)
+
+	_, err := usecase.AddOne("", 2020)
+
+	if err == nil {
+		t.Error("Did not validate blank title")
+	}
+
+}
