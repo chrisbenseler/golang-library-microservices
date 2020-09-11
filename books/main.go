@@ -24,23 +24,23 @@ func main() {
 	usecase := domain.NewBookUsecase(repository)
 
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
+	r.GET("/api/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
 
-	r.GET("/books/:id", func(c *gin.Context) {
+	r.GET("/api/books/:id", func(c *gin.Context) {
 		book, _ := usecase.GetByID(c.Param("id"))
 		c.JSON(200, book)
 	})
 
-	r.GET("/books", func(c *gin.Context) {
+	r.GET("/api/books", func(c *gin.Context) {
 		books, _ := usecase.All()
 		c.JSON(200, books)
 	})
 
-	r.POST("/books", func(c *gin.Context) {
+	r.POST("/api/books", func(c *gin.Context) {
 
 		bookPayload := BookPayload{}
 		if err := c.BindJSON(&bookPayload); err != nil {
@@ -58,5 +58,5 @@ func main() {
 
 	})
 
-	r.Run()
+	r.Run(":3000")
 }
