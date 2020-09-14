@@ -31,7 +31,7 @@ func (u *usecaseService) GenerateID() string {
 	const charset = "abcdefghijklmnopqrstuvwxyz" +
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-	b := make([]byte, 16)
+	b := make([]byte, 32)
 	for i := range b {
 		b[i] = charset[seededRand.Intn(len(charset))]
 	}

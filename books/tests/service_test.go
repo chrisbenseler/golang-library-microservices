@@ -11,7 +11,7 @@ func Test_Service(t *testing.T) {
 
 	id := service.GenerateID()
 
-	if len(id) != 16 {
+	if len(id) != 32 {
 		t.Error("Invalid length for new ID")
 	}
 }

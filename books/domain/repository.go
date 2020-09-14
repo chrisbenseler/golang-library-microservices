@@ -1,11 +1,7 @@
 package domain
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
+	"database/sql"
 )
 
 //Repository book repository (persistence)
@@ -17,13 +13,18 @@ type Repository interface {
 
 type repositoryStruct struct {
 	service Service
+	db      *sql.DB
 }
 
 //NewBookRepository create a new book repository
-func NewBookRepository(service Service) Repository {
+func NewBookRepository(service Service, database *sql.DB) Repository {
+
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS book (id STRING PRIMARY KEY, title TEXT, year INTEGER)")
+	statement.Exec()
 
 	return &repositoryStruct{
 		service: service,
+		db:      database,
 	}
 }
 
@@ -32,36 +33,34 @@ func (r *repositoryStruct) Save(title string, year int) (Book, error) {
 
 	book := NewBook(r.service.GenerateID(), title, year)
 
-	bookJSON, _ := json.Marshal(book)
+	statement, _ := r.db.Prepare("INSERT INTO book (id, title, year) VALUES (?, ?, ?)")
 
-	fileName := book.ID + ".json"
-
-	err := ioutil.WriteFile("./data/"+fileName, bookJSON, 0644)
+	_, err := statement.Exec(book.ID, book.Title, book.Year)
 
 	return *book, err
-
-}
-
-func readFile(path string) (Book, error) {
-	book := Book{}
-
-	byteValue, err := ioutil.ReadFile(path)
-
-	if err != nil {
-		return book, err
-	}
-
-	json.Unmarshal(byteValue, &book)
-
-	return book, nil
 }
 
 //Get get a book by its id
 func (r *repositoryStruct) Get(id string) (Book, error) {
 
-	fileName := id + ".json"
+	book := &Book{}
 
-	return readFile("./data/" + fileName)
+	rows, err := r.db.Query("SELECT id, title, year FROM book WHERE id = '" + id + "' LIMIT 1")
+
+	if err != nil {
+		return *book, err
+	}
+
+	for rows.Next() {
+		var id string
+		var title string
+		var year int
+		rows.Scan(&id, &title, &year)
+		book = NewBook(id, title, year)
+
+	}
+
+	return *book, nil
 
 }
 
@@ -70,24 +69,15 @@ func (r *repositoryStruct) All() ([]Book, error) {
 
 	books := []Book{}
 
-	var files []string
+	rows, _ := r.db.Query("SELECT id, title, year FROM book")
 
-	err := filepath.Walk("./data/", func(path string, info os.FileInfo, err error) error {
-
-		if strings.Contains(path, ".json") == true {
-			files = append(files, path)
-		}
-		return nil
-
-	})
-
-	if err != nil {
-		return []Book{}, err
-	}
-
-	for _, file := range files {
-		book, _ := readFile(file)
-		books = append(books, book)
+	for rows.Next() {
+		var id string
+		var title string
+		var year int
+		rows.Scan(&id, &title, &year)
+		book := NewBook(id, title, year)
+		books = append(books, *book)
 	}
 
 	return books, nil

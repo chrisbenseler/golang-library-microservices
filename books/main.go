@@ -1,14 +1,17 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"librarymanager/books/domain"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
-type BookPayload struct {
+type bookPayload struct {
 	Title string `json:"title"`
 	Year  int    `json:"year"`
 }
@@ -19,7 +22,9 @@ func main() {
 
 	service := domain.NewBookService()
 
-	repository := domain.NewBookRepository(service)
+	database, _ := sql.Open("sqlite3", "./data/tmp.db")
+
+	repository := domain.NewBookRepository(service, database)
 
 	usecase := domain.NewBookUsecase(repository)
 
@@ -42,7 +47,7 @@ func main() {
 
 	r.POST("/api/books", func(c *gin.Context) {
 
-		bookPayload := BookPayload{}
+		bookPayload := bookPayload{}
 		if err := c.BindJSON(&bookPayload); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
