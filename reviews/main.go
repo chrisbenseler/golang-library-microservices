@@ -26,28 +26,16 @@ func main() {
 	usecase := domain.NewReviewUsecase(repository)
 
 	r := gin.Default()
-	r.GET("/api/ping", func(c *gin.Context) {
+	r.GET("/api/reviews/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
 
-	/*
-		r.GET("/api/books/:id", func(c *gin.Context) {
-			book, _ := usecase.GetByID(c.Param("id"))
-			c.JSON(200, book)
-		})
-
-		r.GET("/api/books", func(c *gin.Context) {
-			books, _ := usecase.All()
-			c.JSON(200, books)
-		})
-	*/
-
 	r.GET("/api/reviews/books/:id", func(c *gin.Context) {
 		bookID := c.Param("id")
-		books, _ := usecase.AllFromBook(bookID)
-		c.JSON(200, books)
+		reviews, _ := usecase.AllFromBook(bookID)
+		c.JSON(200, reviews)
 	})
 
 	r.POST("/api/reviews/books/:id", func(c *gin.Context) {

@@ -4,9 +4,9 @@ RUN go get -v github.com/gin-gonic/gin
 RUN go get -v github.com/mattn/go-sqlite3
 
 RUN mkdir /go/src/librarymanager/ 
-RUN mkdir /go/src/librarymanager/books/ 
-ADD . /go/src/librarymanager/books
-WORKDIR /go/src/librarymanager/books 
+RUN mkdir /go/src/librarymanager/reviews/ 
+ADD . /go/src/librarymanager/reviews
+WORKDIR /go/src/librarymanager/reviews 
 
 
 RUN go install
