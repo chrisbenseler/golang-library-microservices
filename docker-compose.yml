@@ -5,11 +5,18 @@ services:
     build: './books'
     ports:
       - "3002:3000"
+    environment:
+      REDIS_URL: redis:6379
+      
   reviews:
     build: './reviews'
     ports:
       - "3003:3000"
 
+  redis:
+    image: redis:alpine
+    command: ["redis-server", "--bind", "redis", "--port", "6379"]
+    
   nginx:
     image: nginx:latest
     ports:

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"database/sql"
+	"errors"
 )
 
 //Repository book repository (persistence)
@@ -9,6 +10,7 @@ type Repository interface {
 	Save(title string, year int) (Book, error)
 	Get(id string) (Book, error)
 	All() ([]Book, error)
+	Destroy(id string) error
 }
 
 type repositoryStruct struct {
@@ -45,7 +47,7 @@ func (r *repositoryStruct) Get(id string) (Book, error) {
 
 	book := &Book{}
 
-	rows, err := r.db.Query("SELECT id, title, year FROM book WHERE id = '" + id + "' LIMIT 1")
+	rows, err := r.db.Query("SELECT 1 id, title, year FROM book WHERE id = '" + id + "' LIMIT 1")
 
 	if err != nil {
 		return *book, err
@@ -58,6 +60,10 @@ func (r *repositoryStruct) Get(id string) (Book, error) {
 		rows.Scan(&id, &title, &year)
 		book = NewBook(id, title, year)
 
+	}
+
+	if book.ID == "" {
+		return *book, errors.New("No book found for the given ID")
 	}
 
 	return *book, nil
@@ -81,5 +87,15 @@ func (r *repositoryStruct) All() ([]Book, error) {
 	}
 
 	return books, nil
+
+}
+
+//Destroy destroy a book by its id
+func (r *repositoryStruct) Destroy(id string) error {
+
+	statement, _ := r.db.Prepare("DELETE FROM book WHERE id = ?")
+
+	_, err := statement.Exec(id)
+	return err
 
 }
