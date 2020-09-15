@@ -2,6 +2,7 @@ FROM golang:1.14
 
 RUN go get -v github.com/gin-gonic/gin
 RUN go get -v github.com/mattn/go-sqlite3
+RUN go get -v github.com/go-redis/redis
 
 RUN mkdir /go/src/librarymanager/ 
 RUN mkdir /go/src/librarymanager/reviews/ 

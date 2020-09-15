@@ -19,11 +19,15 @@ func main() {
 
 	fmt.Print("Reviews process")
 
+	broker := domain.NewBroker()
+
 	database, _ := sql.Open("sqlite3", "./data/tmp.db")
 
 	repository := domain.NewReviewRepository(database)
 
-	usecase := domain.NewReviewUsecase(repository)
+	usecase := domain.NewReviewUsecase(repository, broker)
+
+	usecase.Subscriptions()
 
 	r := gin.Default()
 	r.GET("/api/reviews/ping", func(c *gin.Context) {

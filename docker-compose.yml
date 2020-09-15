@@ -12,6 +12,8 @@ services:
     build: './reviews'
     ports:
       - "3003:3000"
+    environment:
+      REDIS_URL: redis:6379
 
   redis:
     image: redis:alpine

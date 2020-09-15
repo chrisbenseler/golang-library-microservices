@@ -7,8 +7,9 @@ import (
 
 //Repository book repository (persistence)
 type Repository interface {
-	Save(content string, entityKey string, entityID string) (Review, error)
+	Save(entityID string, entityKey string, content string) (Review, error)
 	FindAll(entityID string, entityKey string) ([]Review, error)
+	DestroyByType(entityID string, entityKey string) error
 }
 
 type repositoryStruct struct {
@@ -27,7 +28,7 @@ func NewReviewRepository(database *sql.DB) Repository {
 }
 
 //Save review
-func (r *repositoryStruct) Save(content string, entityID string, entityKey string) (Review, error) {
+func (r *repositoryStruct) Save(entityID string, entityKey string, content string) (Review, error) {
 
 	review := NewReview("", content, entityID, entityKey)
 
@@ -58,4 +59,14 @@ func (r *repositoryStruct) FindAll(entityID string, entityKey string) ([]Review,
 	}
 
 	return reviews, nil
+}
+
+//Destroy destroy a book by its id
+func (r *repositoryStruct) DestroyByType(entityID string, entityKey string) error {
+
+	statement, _ := r.db.Prepare("DELETE FROM review WHERE entityID = ? AND entityKey = ?")
+
+	_, err := statement.Exec(entityID, entityKey)
+	return err
+
 }
