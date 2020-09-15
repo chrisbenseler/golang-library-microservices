@@ -5,6 +5,8 @@ services:
     build: './books'
     ports:
       - "3002:3000"
+    volumes:
+      - ./books/data/tmp.db:/go/src/librarymanager/books/tmp.db
     environment:
       REDIS_URL: redis:6379
       
@@ -12,6 +14,8 @@ services:
     build: './reviews'
     ports:
       - "3003:3000"
+    volumes:
+      - ./reviews/data/tmp.db:/go/src/librarymanager/reviews/tmp.db
     environment:
       REDIS_URL: redis:6379
 
