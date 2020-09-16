@@ -1,0 +1,7 @@
+<section *ngIf="reviews$ | async as reviews">
+    <article *ngFor="let review of reviews">
+        {{ review.content }}
+    </article>
+</section>
+
+<a [routerLink]="['new']">Novo</a>

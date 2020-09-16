@@ -1,5 +1,7 @@
 <ul *ngIf="books$ | async as books">
     <li *ngFor="let book of books">
         {{ book.title }} ({{ book.year}})
+
+        <a [routerLink]="['/books', book.id, 'reviews']">Ver reviews</a>
     </li>
 </ul>

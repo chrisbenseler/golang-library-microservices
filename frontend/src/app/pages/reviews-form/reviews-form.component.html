@@ -1,0 +1,10 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <h3>Review</h3>
+
+    <label>
+        Conteúdo:
+        <textarea type="text" formControlName="content"></textarea>
+    </label>
+    <button type="submit" [disabled]="!form.valid">Salvar</button>
+
+</form>

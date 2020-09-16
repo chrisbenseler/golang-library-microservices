@@ -18,4 +18,12 @@ export class ApiService {
     return this.http.post(environment.api + 'books/', { title, year })
   }
 
+  reviews(bookId: string) {
+    return this.http.get(environment.api + `reviews/books/${bookId}`)
+  }
+
+  createReview(entityKey: string, entityId: string, content: string) {
+    return this.http.post(environment.api + 'reviews/' + entityKey + "/" + entityId, { content })
+  }
+
 }
