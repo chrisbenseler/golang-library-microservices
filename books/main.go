@@ -6,6 +6,7 @@ import (
 	"librarymanager/books/domain"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -31,6 +32,8 @@ func main() {
 	usecase := domain.NewBookUsecase(repository, broker)
 
 	router := gin.Default()
+
+	router.Use(cors.Default())
 
 	router.GET("/api/booksping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -81,6 +84,8 @@ func main() {
 		})
 
 	}
+
+	apiRoutes.Use(cors.Default())
 
 	router.Run(":3000")
 }

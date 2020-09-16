@@ -1,0 +1,5 @@
+<ul *ngIf="books$ | async as books">
+    <li *ngFor="let book of books">
+        {{ book.title }} ({{ book.year}})
+    </li>
+</ul>

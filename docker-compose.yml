@@ -1,5 +1,10 @@
-version: '3'
+version: '3.5'
 services:
+
+  frontend:
+    build: './frontend'
+    ports:
+      - "3001:3000"
   
   books:
     build: './books'
@@ -32,3 +37,4 @@ services:
     depends_on:
       - books
       - reviews
+      - frontend

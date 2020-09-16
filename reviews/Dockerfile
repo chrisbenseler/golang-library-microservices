@@ -14,6 +14,7 @@ RUN go install
 
 RUN go build main.go 
 
+EXPOSE 3000
 EXPOSE 8080
 
 CMD ["./main"]

@@ -1,0 +1,14 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <h3>Detalhe do Livro</h3>
+
+    <label>
+        Título:
+        <input type="text" formControlName="title" />
+    </label>
+    <label>
+        Ano:
+        <input type="text" formControlName="year" />
+    </label>
+    <button type="submit" [disabled]="!form.valid">Salvar</button>
+    
+</form>
