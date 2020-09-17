@@ -9,6 +9,7 @@ import { BooksFormComponent } from './pages/books-form/books-form.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ReviewsComponent } from './pages/reviews/reviews.component';
 import { ReviewsFormComponent } from './pages/reviews-form/reviews-form.component';
+import { SignInComponent } from './pages/sign-in/sign-in.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { ReviewsFormComponent } from './pages/reviews-form/reviews-form.componen
     BooksComponent,
     BooksFormComponent,
     ReviewsComponent,
-    ReviewsFormComponent
+    ReviewsFormComponent,
+    SignInComponent
   ],
   imports: [
     BrowserModule,

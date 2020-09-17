@@ -1,0 +1,17 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <h3>Login</h3>
+
+    <label>
+        E-mail:
+        <input type="text" formControlName="email" />
+    </label>
+    <label>
+        Senha:
+        <input type="password" formControlName="password" />
+    </label>
+    <button type="submit" [disabled]="!form.valid">Entrar</button>
+
+    <div *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div *ngIf="loading">Aguarde, enviando...</div>
+
+</form>
