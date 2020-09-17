@@ -11,7 +11,7 @@ services:
     ports:
       - "3002:3000"
     volumes:
-      - ./books/data/tmp.db:/go/src/librarymanager/books/tmp.db
+      - ./books/data/:/go/src/librarymanager/books/data/
     environment:
       REDIS_URL: redis:6379
       ACCESS_SECRET: SOMESECRET
@@ -28,7 +28,7 @@ services:
     ports:
       - "3003:3000"
     volumes:
-      - ./reviews/data/tmp.db:/go/src/librarymanager/reviews/tmp.db
+      - ./reviews/data/:/go/src/librarymanager/reviews/data/
     environment:
       REDIS_URL: redis:6379
 

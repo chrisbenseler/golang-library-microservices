@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"librarymanager/books/domain"
 	"net/http"
+	"strings"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
@@ -41,6 +43,50 @@ func main() {
 		})
 	})
 
+	checkJWTToken := func(c *gin.Context) {
+		bearToken := c.GetHeader("Authorization")
+
+		strArr := strings.Split(bearToken, " ")
+		if len(strArr) == 2 {
+
+			token, err := service.VerifyToken(strArr[1])
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+
+			claims, _ := token.Claims.(jwt.MapClaims)
+
+			c.Set("user_id", claims["user_id"])
+
+			return
+
+		}
+
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token inválido"})
+		return
+	}
+
+	createNewBookRoute := func(c *gin.Context) {
+
+		bookPayload := bookPayload{}
+		if err := c.BindJSON(&bookPayload); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		userID, _ := c.Get("user_id")
+
+		book, err := usecase.AddOne(bookPayload.Title, bookPayload.Year, userID.(string))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(201, book)
+
+	}
+
 	apiRoutes := router.Group("/api/books")
 	{
 
@@ -60,23 +106,7 @@ func main() {
 			c.JSON(200, books)
 		})
 
-		apiRoutes.POST("/", func(c *gin.Context) {
-
-			bookPayload := bookPayload{}
-			if err := c.BindJSON(&bookPayload); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-
-			book, err := usecase.AddOne(bookPayload.Title, bookPayload.Year)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-
-			c.JSON(201, book)
-
-		})
+		apiRoutes.POST("/", checkJWTToken, createNewBookRoute)
 
 		apiRoutes.DELETE("/:id", func(c *gin.Context) {
 			usecase.Destroy(c.Param("id"))

@@ -7,7 +7,7 @@ import (
 
 //Repository book repository (persistence)
 type Repository interface {
-	Save(title string, year int) (Book, error)
+	Save(title string, year int, createdByID string) (Book, error)
 	Get(id string) (Book, error)
 	All() ([]Book, error)
 	Destroy(id string) error
@@ -21,7 +21,7 @@ type repositoryStruct struct {
 //NewBookRepository create a new book repository
 func NewBookRepository(service Service, database *sql.DB) Repository {
 
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS book (id STRING PRIMARY KEY, title TEXT, year INTEGER)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS book (id STRING PRIMARY KEY, title TEXT, year INTEGER, createdByID TEXT)")
 	statement.Exec()
 
 	return &repositoryStruct{
@@ -31,13 +31,13 @@ func NewBookRepository(service Service, database *sql.DB) Repository {
 }
 
 //Save book
-func (r *repositoryStruct) Save(title string, year int) (Book, error) {
+func (r *repositoryStruct) Save(title string, year int, createdByID string) (Book, error) {
 
-	book := NewBook(r.service.GenerateID(), title, year)
+	book := NewBook(r.service.GenerateID(), title, year, createdByID)
 
-	statement, _ := r.db.Prepare("INSERT INTO book (id, title, year) VALUES (?, ?, ?)")
+	statement, _ := r.db.Prepare("INSERT INTO book (id, title, year, createdByID) VALUES (?, ?, ?, ?)")
 
-	_, err := statement.Exec(book.ID, book.Title, book.Year)
+	_, err := statement.Exec(book.ID, book.Title, book.Year, book.CreatedByID)
 
 	return *book, err
 }
@@ -47,18 +47,19 @@ func (r *repositoryStruct) Get(id string) (Book, error) {
 
 	book := &Book{}
 
-	rows, err := r.db.Query("SELECT 1 id, title, year FROM book WHERE id = '" + id + "' LIMIT 1")
+	rows, err := r.db.Query("SELECT 1 title, year, createdByID FROM book WHERE id = '" + id + "' LIMIT 1")
 
 	if err != nil {
 		return *book, err
 	}
 
 	for rows.Next() {
-		var id string
+
 		var title string
 		var year int
-		rows.Scan(&id, &title, &year)
-		book = NewBook(id, title, year)
+		var createdByID string
+		rows.Scan(&title, &year, &createdByID)
+		book = NewBook(id, title, year, createdByID)
 
 	}
 
@@ -75,14 +76,15 @@ func (r *repositoryStruct) All() ([]Book, error) {
 
 	books := []Book{}
 
-	rows, _ := r.db.Query("SELECT id, title, year FROM book")
+	rows, _ := r.db.Query("SELECT id, title, year, createdByID FROM book")
 
 	for rows.Next() {
 		var id string
 		var title string
 		var year int
-		rows.Scan(&id, &title, &year)
-		book := NewBook(id, title, year)
+		var createdByID string
+		rows.Scan(&id, &title, &year, &createdByID)
+		book := NewBook(id, title, year, createdByID)
 		books = append(books, *book)
 	}
 

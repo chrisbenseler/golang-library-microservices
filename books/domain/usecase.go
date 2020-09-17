@@ -7,7 +7,7 @@ import (
 
 //Usecase books use case interface
 type Usecase interface {
-	AddOne(title string, year int) (Book, error)
+	AddOne(title string, year int, createdByID string) (Book, error)
 	GetByID(id string) (Book, error)
 	All() ([]Book, error)
 	Destroy(id string) error
@@ -35,13 +35,13 @@ func NewBookUsecase(repository Repository, broker Broker) Usecase {
 }
 
 //AddOne method
-func (u *usecaseStruct) AddOne(title string, year int) (Book, error) {
+func (u *usecaseStruct) AddOne(title string, year int, createdByID string) (Book, error) {
 
 	if len(title) == 0 {
 		return Book{}, errors.New("Invalid parameters provided")
 	}
 
-	return u.repository.Save(title, year)
+	return u.repository.Save(title, year, createdByID)
 }
 
 //GetByID method
