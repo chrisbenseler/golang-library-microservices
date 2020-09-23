@@ -94,7 +94,7 @@ func CreateToken(userKey string) (*TokenDetails, error) {
 
 	var err error
 	//Creating Access Token
-	os.Setenv("ACCESS_SECRET", "jdnfksdmfksd") //this should be in an env file
+	os.Setenv("ACCESS_SECRET", os.Getenv("ACCESS_SECRET"))
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims["access_uuid"] = td.AccessUUID
