@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"librarymanager/books/domain"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
@@ -55,7 +56,7 @@ func main() {
 		strArr := strings.Split(bearToken, " ")
 		if len(strArr) == 2 {
 
-			token, err := service.VerifyToken(strArr[1])
+			token, err := service.VerifyToken(strArr[1], os.Getenv("ACCESS_SECRET"))
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 				return
