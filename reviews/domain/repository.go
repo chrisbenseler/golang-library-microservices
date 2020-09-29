@@ -7,7 +7,7 @@ import (
 
 //Repository book repository (persistence)
 type Repository interface {
-	Save(entityID string, entityKey string, content string) (Review, error)
+	Save(entityID string, entityKey string, content string, createdByID string) (Review, error)
 	FindAll(entityID string, entityKey string) ([]Review, error)
 	DestroyByType(entityID string, entityKey string) error
 }
@@ -19,7 +19,7 @@ type repositoryStruct struct {
 //NewReviewRepository create a new book repository
 func NewReviewRepository(database *sql.DB) Repository {
 
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS review (id INTEGER PRIMARY KEY, content TEXT, entityID TEXT, entityKey TEXT)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS review (id INTEGER PRIMARY KEY, content TEXT, entityID TEXT, entityKey TEXT, createdByID TEXT)")
 	statement.Exec()
 
 	return &repositoryStruct{
@@ -28,13 +28,13 @@ func NewReviewRepository(database *sql.DB) Repository {
 }
 
 //Save review
-func (r *repositoryStruct) Save(entityID string, entityKey string, content string) (Review, error) {
+func (r *repositoryStruct) Save(entityID string, entityKey string, content string, createdByID string) (Review, error) {
 
-	review := NewReview("", content, entityID, entityKey)
+	review := NewReview("", content, entityID, entityKey, createdByID)
 
-	statement, _ := r.db.Prepare("INSERT INTO review (content, entityID, entityKey) VALUES (?, ?, ?)")
+	statement, _ := r.db.Prepare("INSERT INTO review (content, entityID, entityKey, createdByID) VALUES (?, ?, ?, ?)")
 
-	result, err := statement.Exec(review.Content, review.EntityID, review.EntityKey)
+	result, err := statement.Exec(review.Content, review.EntityID, review.EntityKey, review.CreatedByID)
 
 	id, _ := result.LastInsertId()
 
@@ -48,13 +48,14 @@ func (r *repositoryStruct) FindAll(entityID string, entityKey string) ([]Review,
 
 	reviews := []Review{}
 
-	rows, _ := r.db.Query("SELECT id, content FROM review WHERE entityID='" + entityID + "' AND entityKey='" + entityKey + "'")
+	rows, _ := r.db.Query("SELECT id, content, createdByID FROM review WHERE entityID='" + entityID + "' AND entityKey='" + entityKey + "'")
 
 	for rows.Next() {
 		var id string
 		var content string
-		rows.Scan(&id, &content)
-		review := NewReview(id, content, entityID, entityKey)
+		var createdByID string
+		rows.Scan(&id, &content, &createdByID)
+		review := NewReview(id, content, entityID, entityKey, createdByID)
 		reviews = append(reviews, *review)
 	}
 

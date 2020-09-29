@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"librarymanager/reviews/domain"
 	"net/http"
+	"os"
+	"strings"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
@@ -40,6 +43,32 @@ func main() {
 		})
 	})
 
+	service := domain.NewReviewService()
+
+	checkJWTToken := func(c *gin.Context) {
+		bearToken := c.GetHeader("Authorization")
+
+		strArr := strings.Split(bearToken, " ")
+		if len(strArr) == 2 {
+
+			token, err := service.VerifyToken(strArr[1], os.Getenv("ACCESS_SECRET"))
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+
+			claims, _ := token.Claims.(jwt.MapClaims)
+
+			c.Set("user_id", claims["user_id"])
+
+			return
+
+		}
+
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token inválido"})
+		return
+	}
+
 	apiRoutes := router.Group("/api/reviews")
 	{
 		apiRoutes.GET("/books/:id", func(c *gin.Context) {
@@ -48,7 +77,7 @@ func main() {
 			c.JSON(200, reviews)
 		})
 
-		apiRoutes.POST("/books/:id", func(c *gin.Context) {
+		apiRoutes.POST("/books/:id", checkJWTToken, func(c *gin.Context) {
 
 			bookID := c.Param("id")
 
@@ -58,7 +87,9 @@ func main() {
 				return
 			}
 
-			book, err := usecase.AddBookReview(bookID, payload.Content)
+			userID, _ := c.Get("user_id")
+
+			book, err := usecase.AddBookReview(bookID, payload.Content, userID.(string))
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return

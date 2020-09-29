@@ -32,6 +32,7 @@ services:
       - ./reviews/data/:/go/src/librarymanager/reviews/data/
     environment:
       REDIS_URL: redis:6379
+      ACCESS_SECRET: SOMESECRET
 
   redis:
     image: redis:alpine

@@ -21,13 +21,6 @@ type usecaseStruct struct {
 //NewBookUsecase create a new book use case
 func NewBookUsecase(repository Repository, broker Broker) Usecase {
 
-	/*
-		broker.Subscribe("book_getall", func(data interface{}) {
-			fmt.Print("Book get all msg from broker")
-			fmt.Print(data)
-		})
-	*/
-
 	return &usecaseStruct{
 		repository: repository,
 		rdb:        broker,

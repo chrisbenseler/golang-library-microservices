@@ -7,7 +7,7 @@ import (
 
 //Usecase reviews use case interface
 type Usecase interface {
-	AddBookReview(bookID string, content string) (Review, error)
+	AddBookReview(bookID string, content string, createdByID string) (Review, error)
 	AllFromBook(bookID string) ([]Review, error)
 	Subscriptions()
 }
@@ -42,8 +42,8 @@ func (u *usecaseStruct) Subscriptions() {
 }
 
 //AddBookReview method
-func (u *usecaseStruct) AddBookReview(bookID string, content string) (Review, error) {
-	return u.repository.Save(bookID, "book", content)
+func (u *usecaseStruct) AddBookReview(bookID string, content string, createdByID string) (Review, error) {
+	return u.repository.Save(bookID, "book", content, createdByID)
 }
 
 //AllFromBook method
