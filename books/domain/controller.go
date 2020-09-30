@@ -56,7 +56,15 @@ func (r *controllerStruct) All(c *gin.Context) {
 }
 
 func (r *controllerStruct) Delete(c *gin.Context) {
-	r.usecase.Destroy(c.Param("id"))
+	userID, _ := c.Get("user_id")
+
+	err := r.usecase.Destroy(c.Param("id"), userID.(string))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(200, gin.H{})
 }
 

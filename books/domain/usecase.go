@@ -10,7 +10,7 @@ type Usecase interface {
 	AddOne(title string, year int, createdByID string) (Book, error)
 	GetByID(id string) (Book, error)
 	All() ([]Book, error)
-	Destroy(id string) error
+	Destroy(id string, createdByID string) error
 }
 
 type usecaseStruct struct {
@@ -48,7 +48,13 @@ func (u *usecaseStruct) All() ([]Book, error) {
 }
 
 //Destroy destroy a book
-func (u *usecaseStruct) Destroy(id string) error {
+func (u *usecaseStruct) Destroy(id string, createdByID string) error {
+
+	book, _ := u.repository.Get(id)
+
+	if book.CreatedByID != createdByID {
+		return errors.New("This user cannot perform this action")
+	}
 
 	err := u.repository.Destroy(id)
 
