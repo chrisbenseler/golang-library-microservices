@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"librarymanager/books/domain"
 	"net/http"
-	"os"
-	"strings"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
@@ -33,15 +30,13 @@ func main() {
 	repository := domain.NewBookRepository(service, database)
 
 	usecase := domain.NewBookUsecase(repository, broker)
+	middleware := domain.NewMiddleware(service)
 
 	router := gin.Default()
-
 	config := cors.DefaultConfig()
-
 	config.AllowAllOrigins = true
 	config.AddAllowHeaders("Authorization", "Access-Control-Allow-Headers")
 	config.AddExposeHeaders("Authorization")
-
 	router.Use(cors.New(config))
 
 	router.GET("/api/booksping", func(c *gin.Context) {
@@ -49,30 +44,6 @@ func main() {
 			"message": "pong",
 		})
 	})
-
-	checkJWTToken := func(c *gin.Context) {
-		bearToken := c.GetHeader("Authorization")
-
-		strArr := strings.Split(bearToken, " ")
-		if len(strArr) == 2 {
-
-			token, err := service.VerifyToken(strArr[1], os.Getenv("ACCESS_SECRET"))
-			if err != nil {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-				return
-			}
-
-			claims, _ := token.Claims.(jwt.MapClaims)
-
-			c.Set("user_id", claims["user_id"])
-
-			return
-
-		}
-
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token inválido"})
-		return
-	}
 
 	createNewBookRoute := func(c *gin.Context) {
 
@@ -113,7 +84,7 @@ func main() {
 			c.JSON(200, books)
 		})
 
-		apiRoutes.POST("/", checkJWTToken, createNewBookRoute)
+		apiRoutes.POST("/", middleware.CheckJWTToken, createNewBookRoute)
 
 		apiRoutes.DELETE("/:id", func(c *gin.Context) {
 			usecase.Destroy(c.Param("id"))
