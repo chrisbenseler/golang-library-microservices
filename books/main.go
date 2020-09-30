@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"librarymanager/books/domain"
-	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -31,6 +30,7 @@ func main() {
 
 	usecase := domain.NewBookUsecase(repository, broker)
 	middleware := domain.NewMiddleware(service)
+	controller := domain.NewController(usecase)
 
 	router := gin.Default()
 	config := cors.DefaultConfig()
@@ -45,51 +45,16 @@ func main() {
 		})
 	})
 
-	createNewBookRoute := func(c *gin.Context) {
-
-		bookPayload := bookPayload{}
-		if err := c.BindJSON(&bookPayload); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		userID, _ := c.Get("user_id")
-
-		book, err := usecase.AddOne(bookPayload.Title, bookPayload.Year, userID.(string))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(201, book)
-
-	}
-
 	apiRoutes := router.Group("/api/books")
 	{
 
-		apiRoutes.GET("/:id", func(c *gin.Context) {
-			book, err := usecase.GetByID(c.Param("id"))
+		apiRoutes.GET("/:id", controller.GetByID)
 
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
+		apiRoutes.GET("/", controller.All)
 
-			c.JSON(200, book)
-		})
+		apiRoutes.POST("/", middleware.CheckJWTToken, controller.Create)
 
-		apiRoutes.GET("/", func(c *gin.Context) {
-			books, _ := usecase.All()
-			c.JSON(200, books)
-		})
-
-		apiRoutes.POST("/", middleware.CheckJWTToken, createNewBookRoute)
-
-		apiRoutes.DELETE("/:id", func(c *gin.Context) {
-			usecase.Destroy(c.Param("id"))
-			c.JSON(200, gin.H{})
-		})
+		apiRoutes.DELETE("/:id", middleware.CheckJWTToken, controller.Delete)
 
 	}
 
