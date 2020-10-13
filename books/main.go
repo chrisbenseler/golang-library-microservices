@@ -13,11 +13,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type bookPayload struct {
-	Title string `json:"title"`
-	Year  int    `json:"year"`
-}
-
 func main() {
 
 	fmt.Print("Books process with broker")
