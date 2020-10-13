@@ -1,13 +1,14 @@
-package domain
+package controllers
 
 import (
+	"librarymanager/books/usecases"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-//Controller controller interface
-type Controller interface {
+//Books controller interface
+type Books interface {
 	Create(c *gin.Context)
 	All(c *gin.Context)
 	Delete(c *gin.Context)
@@ -15,11 +16,11 @@ type Controller interface {
 }
 
 type controllerStruct struct {
-	usecase Usecase
+	usecase usecases.Book
 }
 
-//NewController create new controller
-func NewController(usecase Usecase) Controller {
+//NewBooksController create new controller
+func NewBooksController(usecase usecases.Book) Books {
 	return &controllerStruct{
 		usecase: usecase,
 	}

@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"librarymanager/books/controllers"
 	"librarymanager/books/domain"
+	"librarymanager/books/usecases"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -28,9 +30,9 @@ func main() {
 
 	repository := domain.NewBookRepository(service, database)
 
-	usecase := domain.NewBookUsecase(repository, broker)
+	usecase := usecases.NewBooksUsecase(repository, broker)
 	middleware := domain.NewMiddleware(service)
-	controller := domain.NewController(usecase)
+	booksController := controllers.NewBooksController(usecase)
 
 	router := gin.Default()
 	config := cors.DefaultConfig()
@@ -48,13 +50,13 @@ func main() {
 	apiRoutes := router.Group("/api/books")
 	{
 
-		apiRoutes.GET("/:id", controller.GetByID)
+		apiRoutes.GET("/:id", booksController.GetByID)
 
-		apiRoutes.GET("/", controller.All)
+		apiRoutes.GET("/", booksController.All)
 
-		apiRoutes.POST("/", middleware.CheckJWTToken, controller.Create)
+		apiRoutes.POST("/", middleware.CheckJWTToken, booksController.Create)
 
-		apiRoutes.DELETE("/:id", middleware.CheckJWTToken, controller.Delete)
+		apiRoutes.DELETE("/:id", middleware.CheckJWTToken, booksController.Delete)
 
 	}
 
