@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"librarymanager/books/usecases"
+	"librarymanager/books/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,13 +16,13 @@ type Books interface {
 }
 
 type controllerStruct struct {
-	usecase usecases.Book
+	booksService services.Book
 }
 
 //NewBooksController create new controller
-func NewBooksController(usecase usecases.Book) Books {
+func NewBooksController(booksService services.Book) Books {
 	return &controllerStruct{
-		usecase: usecase,
+		booksService: booksService,
 	}
 }
 
@@ -41,7 +41,7 @@ func (r *controllerStruct) Create(c *gin.Context) {
 
 	userID, _ := c.Get("user_id")
 
-	book, err := r.usecase.AddOne(bookPayload.Title, bookPayload.Year, userID.(string))
+	book, err := r.booksService.AddOne(bookPayload.Title, bookPayload.Year, userID.(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -52,14 +52,14 @@ func (r *controllerStruct) Create(c *gin.Context) {
 }
 
 func (r *controllerStruct) All(c *gin.Context) {
-	books, _ := r.usecase.All()
+	books, _ := r.booksService.All()
 	c.JSON(200, books)
 }
 
 func (r *controllerStruct) Delete(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 
-	err := r.usecase.Destroy(c.Param("id"), userID.(string))
+	err := r.booksService.Destroy(c.Param("id"), userID.(string))
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -70,7 +70,17 @@ func (r *controllerStruct) Delete(c *gin.Context) {
 }
 
 func (r *controllerStruct) GetByID(c *gin.Context) {
-	book, err := r.usecase.GetByID(c.Param("id"))
+
+	id := c.Param("id")
+
+	if id == "ping" {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+		return
+	}
+
+	book, err := r.booksService.GetByID(id)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -1,4 +1,4 @@
-package usecases
+package services
 
 import (
 	"encoding/json"
@@ -14,22 +14,22 @@ type Book interface {
 	Destroy(id string, createdByID string) error
 }
 
-type usecaseStruct struct {
+type serviceStruct struct {
 	repository domain.Repository
-	rdb        domain.Broker
+	rdb        Broker
 }
 
-//NewBooksUsecase create a new book use case
-func NewBooksUsecase(repository domain.Repository, broker domain.Broker) Book {
+//NewBooksService create a new book use case
+func NewBooksService(repository domain.Repository, broker Broker) Book {
 
-	return &usecaseStruct{
+	return &serviceStruct{
 		repository: repository,
 		rdb:        broker,
 	}
 }
 
 //AddOne method
-func (u *usecaseStruct) AddOne(title string, year int, createdByID string) (domain.Book, error) {
+func (u *serviceStruct) AddOne(title string, year int, createdByID string) (domain.Book, error) {
 
 	if len(title) == 0 {
 		return domain.Book{}, errors.New("Invalid parameters provided")
@@ -39,17 +39,17 @@ func (u *usecaseStruct) AddOne(title string, year int, createdByID string) (doma
 }
 
 //GetByID method
-func (u *usecaseStruct) GetByID(id string) (domain.Book, error) {
+func (u *serviceStruct) GetByID(id string) (domain.Book, error) {
 	return u.repository.Get(id)
 }
 
 //All method
-func (u *usecaseStruct) All() ([]domain.Book, error) {
+func (u *serviceStruct) All() ([]domain.Book, error) {
 	return u.repository.All()
 }
 
 //Destroy destroy a book
-func (u *usecaseStruct) Destroy(id string, createdByID string) error {
+func (u *serviceStruct) Destroy(id string, createdByID string) error {
 
 	book, _ := u.repository.Get(id)
 

@@ -1,6 +1,7 @@
-package domain
+package middlewares
 
 import (
+	"librarymanager/books/services"
 	"net/http"
 	"os"
 	"strings"
@@ -15,11 +16,11 @@ type Middleware interface {
 }
 
 type middlewareStruct struct {
-	service Service
+	service services.Keys
 }
 
 //NewMiddleware ccreate new middleware
-func NewMiddleware(service Service) Middleware {
+func NewMiddleware(service services.Keys) Middleware {
 
 	return &middlewareStruct{
 		service: service,

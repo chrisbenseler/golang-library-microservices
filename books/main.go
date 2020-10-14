@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"librarymanager/books/controllers"
 	"librarymanager/books/domain"
-	"librarymanager/books/usecases"
+	"librarymanager/books/middlewares"
+	"librarymanager/books/services"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -17,17 +18,17 @@ func main() {
 
 	fmt.Print("Books process with broker")
 
-	service := domain.NewBookService()
+	keysService := services.NewKeysService()
 
-	broker := domain.NewBroker()
+	broker := services.NewBroker()
 
 	database, _ := sql.Open("sqlite3", "./data/tmp.db")
 
-	repository := domain.NewBookRepository(service, database)
+	repository := domain.NewBookRepository(database)
 
-	usecase := usecases.NewBooksUsecase(repository, broker)
-	middleware := domain.NewMiddleware(service)
-	booksController := controllers.NewBooksController(usecase)
+	booksService := services.NewBooksService(repository, broker)
+	middleware := middlewares.NewMiddleware(keysService)
+	booksController := controllers.NewBooksController(booksService)
 
 	router := gin.Default()
 	config := cors.DefaultConfig()
@@ -36,24 +37,7 @@ func main() {
 	config.AddExposeHeaders("Authorization")
 	router.Use(cors.New(config))
 
-	router.GET("/api/booksping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	apiRoutes := router.Group("/api/books")
-	{
-
-		apiRoutes.GET("/:id", booksController.GetByID)
-
-		apiRoutes.GET("/", booksController.All)
-
-		apiRoutes.POST("/", middleware.CheckJWTToken, booksController.Create)
-
-		apiRoutes.DELETE("/:id", middleware.CheckJWTToken, booksController.Delete)
-
-	}
+	apiRoutes := controllers.MapUrls(router, booksController, middleware)
 
 	apiRoutes.Use(cors.New(config))
 

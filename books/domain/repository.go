@@ -3,6 +3,8 @@ package domain
 import (
 	"database/sql"
 	"errors"
+	"math/rand"
+	"time"
 )
 
 //Repository book repository (persistence)
@@ -14,26 +16,24 @@ type Repository interface {
 }
 
 type repositoryStruct struct {
-	service Service
-	db      *sql.DB
+	db *sql.DB
 }
 
 //NewBookRepository create a new book repository
-func NewBookRepository(service Service, database *sql.DB) Repository {
+func NewBookRepository(database *sql.DB) Repository {
 
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS book (id STRING PRIMARY KEY, title TEXT, year INTEGER, createdByID TEXT)")
 	statement.Exec()
 
 	return &repositoryStruct{
-		service: service,
-		db:      database,
+		db: database,
 	}
 }
 
 //Save book
 func (r *repositoryStruct) Save(title string, year int, createdByID string) (Book, error) {
 
-	book := NewBook(r.service.GenerateID(), title, year, createdByID)
+	book := NewBook(GenerateID(), title, year, createdByID)
 
 	statement, _ := r.db.Prepare("INSERT INTO book (id, title, year, createdByID) VALUES (?, ?, ?, ?)")
 
@@ -99,5 +99,22 @@ func (r *repositoryStruct) Destroy(id string) error {
 
 	_, err := statement.Exec(id)
 	return err
+
+}
+
+//GenerateID method
+func GenerateID() string {
+
+	var seededRand *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+
+	const charset = "abcdefghijklmnopqrstuvwxyz" +
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	b := make([]byte, 32)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
 
 }
