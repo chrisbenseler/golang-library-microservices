@@ -8,9 +8,9 @@ import (
 
 //Book use case interface
 type Book interface {
-	AddOne(title string, year int, createdByID string) (domain.Book, error)
-	GetByID(id string) (domain.Book, error)
-	All() ([]domain.Book, error)
+	AddOne(title string, year int, createdByID string) (*domain.Book, error)
+	GetByID(id string) (*domain.Book, error)
+	All() (*[]domain.Book, error)
 	Destroy(id string, createdByID string) error
 }
 
@@ -29,22 +29,22 @@ func NewBooksService(repository domain.Repository, broker Broker) Book {
 }
 
 //AddOne method
-func (u *serviceStruct) AddOne(title string, year int, createdByID string) (domain.Book, error) {
+func (u *serviceStruct) AddOne(title string, year int, createdByID string) (*domain.Book, error) {
 
 	if len(title) == 0 {
-		return domain.Book{}, errors.New("Invalid parameters provided")
+		return nil, errors.New("Invalid parameters provided")
 	}
 
 	return u.repository.Save(title, year, createdByID)
 }
 
 //GetByID method
-func (u *serviceStruct) GetByID(id string) (domain.Book, error) {
+func (u *serviceStruct) GetByID(id string) (*domain.Book, error) {
 	return u.repository.Get(id)
 }
 
 //All method
-func (u *serviceStruct) All() ([]domain.Book, error) {
+func (u *serviceStruct) All() (*[]domain.Book, error) {
 	return u.repository.All()
 }
 

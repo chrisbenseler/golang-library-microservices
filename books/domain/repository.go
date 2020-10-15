@@ -9,9 +9,9 @@ import (
 
 //Repository book repository (persistence)
 type Repository interface {
-	Save(title string, year int, createdByID string) (Book, error)
-	Get(id string) (Book, error)
-	All() ([]Book, error)
+	Save(title string, year int, createdByID string) (*Book, error)
+	Get(id string) (*Book, error)
+	All() (*[]Book, error)
 	Destroy(id string) error
 }
 
@@ -31,26 +31,28 @@ func NewBookRepository(database *sql.DB) Repository {
 }
 
 //Save book
-func (r *repositoryStruct) Save(title string, year int, createdByID string) (Book, error) {
+func (r *repositoryStruct) Save(title string, year int, createdByID string) (*Book, error) {
 
 	book := NewBook(GenerateID(), title, year, createdByID)
 
 	statement, _ := r.db.Prepare("INSERT INTO book (id, title, year, createdByID) VALUES (?, ?, ?, ?)")
 
-	_, err := statement.Exec(book.ID, book.Title, book.Year, book.CreatedByID)
+	if _, err := statement.Exec(book.ID, book.Title, book.Year, book.CreatedByID); err != nil {
+		return nil, err
+	}
 
-	return *book, err
+	return book, nil
 }
 
 //Get get a book by its id
-func (r *repositoryStruct) Get(id string) (Book, error) {
+func (r *repositoryStruct) Get(id string) (*Book, error) {
 
 	book := &Book{}
 
 	rows, err := r.db.Query("SELECT 1 title, year, createdByID FROM book WHERE id = '" + id + "' LIMIT 1")
 
 	if err != nil {
-		return *book, err
+		return nil, err
 	}
 
 	for rows.Next() {
@@ -64,15 +66,15 @@ func (r *repositoryStruct) Get(id string) (Book, error) {
 	}
 
 	if book.ID == "" {
-		return *book, errors.New("No book found for the given ID")
+		return nil, errors.New("No book found for the given ID")
 	}
 
-	return *book, nil
+	return book, nil
 
 }
 
 //All list all books
-func (r *repositoryStruct) All() ([]Book, error) {
+func (r *repositoryStruct) All() (*[]Book, error) {
 
 	books := []Book{}
 
@@ -88,7 +90,7 @@ func (r *repositoryStruct) All() ([]Book, error) {
 		books = append(books, *book)
 	}
 
-	return books, nil
+	return &books, nil
 
 }
 
