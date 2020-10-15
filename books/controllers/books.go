@@ -83,7 +83,7 @@ func (r *controllerStruct) GetByID(c *gin.Context) {
 	book, err := r.booksService.GetByID(id)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(err.Status(), gin.H{"error": err.Message()})
 		return
 	}
 

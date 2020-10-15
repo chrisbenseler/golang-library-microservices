@@ -3,13 +3,14 @@ package services
 import (
 	"encoding/json"
 	"errors"
+	"librarymanager/books/common"
 	"librarymanager/books/domain"
 )
 
 //Book use case interface
 type Book interface {
 	AddOne(title string, year int, createdByID string) (*domain.Book, error)
-	GetByID(id string) (*domain.Book, error)
+	GetByID(id string) (*domain.Book, common.Error)
 	All() (*[]domain.Book, error)
 	Destroy(id string, createdByID string) error
 }
@@ -39,7 +40,7 @@ func (u *serviceStruct) AddOne(title string, year int, createdByID string) (*dom
 }
 
 //GetByID method
-func (u *serviceStruct) GetByID(id string) (*domain.Book, error) {
+func (u *serviceStruct) GetByID(id string) (*domain.Book, common.Error) {
 	return u.repository.Get(id)
 }
 

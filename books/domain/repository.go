@@ -2,7 +2,7 @@ package domain
 
 import (
 	"database/sql"
-	"errors"
+	"librarymanager/books/common"
 	"math/rand"
 	"time"
 )
@@ -10,7 +10,7 @@ import (
 //Repository book repository (persistence)
 type Repository interface {
 	Save(title string, year int, createdByID string) (*Book, error)
-	Get(id string) (*Book, error)
+	Get(id string) (*Book, common.Error)
 	All() (*[]Book, error)
 	Destroy(id string) error
 }
@@ -45,14 +45,14 @@ func (r *repositoryStruct) Save(title string, year int, createdByID string) (*Bo
 }
 
 //Get get a book by its id
-func (r *repositoryStruct) Get(id string) (*Book, error) {
+func (r *repositoryStruct) Get(id string) (*Book, common.Error) {
 
 	book := &Book{}
 
 	rows, err := r.db.Query("SELECT 1 title, year, createdByID FROM book WHERE id = '" + id + "' LIMIT 1")
 
 	if err != nil {
-		return nil, err
+		return nil, common.NewBadRequestError("No book found for the given ID")
 	}
 
 	for rows.Next() {
@@ -66,7 +66,7 @@ func (r *repositoryStruct) Get(id string) (*Book, error) {
 	}
 
 	if book.ID == "" {
-		return nil, errors.New("No book found for the given ID")
+		return nil, common.NewNotFoundError("No book found for the given ID")
 	}
 
 	return book, nil
