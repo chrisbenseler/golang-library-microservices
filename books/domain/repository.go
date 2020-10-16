@@ -12,8 +12,8 @@ import (
 type Repository interface {
 	Save(title string, year int, createdByID string) (*Book, common.CustomError)
 	Get(id string) (*Book, common.CustomError)
-	All() (*[]Book, error)
-	Destroy(id string) error
+	All() (*[]Book, common.CustomError)
+	Destroy(id string) common.CustomError
 }
 
 type repositoryStruct struct {
@@ -75,11 +75,15 @@ func (r *repositoryStruct) Get(id string) (*Book, common.CustomError) {
 }
 
 //All list all books
-func (r *repositoryStruct) All() (*[]Book, error) {
+func (r *repositoryStruct) All() (*[]Book, common.CustomError) {
 
 	books := []Book{}
 
-	rows, _ := r.db.Query("SELECT id, title, year, createdByID FROM book")
+	rows, err := r.db.Query("SELECT id, title, year, createdByID FROM book")
+
+	if err != nil {
+		return nil, common.NewInternalServerError("error when tying to get all users", errors.New("database error"))
+	}
 
 	for rows.Next() {
 		var id string
@@ -96,12 +100,16 @@ func (r *repositoryStruct) All() (*[]Book, error) {
 }
 
 //Destroy destroy a book by its id
-func (r *repositoryStruct) Destroy(id string) error {
+func (r *repositoryStruct) Destroy(id string) common.CustomError {
 
 	statement, _ := r.db.Prepare("DELETE FROM book WHERE id = ?")
 
 	_, err := statement.Exec(id)
-	return err
+
+	if err != nil {
+		return common.NewInternalServerError("error when tying to get all users", errors.New("database error"))
+	}
+	return nil
 
 }
 

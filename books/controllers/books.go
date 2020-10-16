@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"librarymanager/books/common"
 	"librarymanager/books/services"
 	"net/http"
 
@@ -41,6 +42,12 @@ func (r *controllerStruct) Create(c *gin.Context) {
 
 	userID, _ := c.Get("user_id")
 
+	if userID == nil {
+		err := common.NewUnauthorizedError("User not authorized")
+		c.JSON(err.Status(), gin.H{"error": err.Message()})
+		return
+	}
+
 	book, err := r.booksService.AddOne(bookPayload.Title, bookPayload.Year, userID.(string))
 	if err != nil {
 		c.JSON(err.Status(), gin.H{"error": err.Message()})
@@ -52,7 +59,11 @@ func (r *controllerStruct) Create(c *gin.Context) {
 }
 
 func (r *controllerStruct) All(c *gin.Context) {
-	books, _ := r.booksService.All()
+	books, err := r.booksService.All()
+	if err != nil {
+		c.JSON(err.Status(), gin.H{"error": err.Message()})
+		return
+	}
 	c.JSON(200, books)
 }
 
@@ -62,7 +73,7 @@ func (r *controllerStruct) Delete(c *gin.Context) {
 	err := r.booksService.Destroy(c.Param("id"), userID.(string))
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(err.Status(), gin.H{"error": err.Message()})
 		return
 	}
 

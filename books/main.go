@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"librarymanager/books/common"
 	"librarymanager/books/controllers"
 	"librarymanager/books/domain"
 	"librarymanager/books/middlewares"
@@ -20,7 +21,7 @@ func main() {
 
 	keysService := services.NewKeysService()
 
-	broker := services.NewBroker()
+	broker := common.NewBroker()
 
 	database, _ := sql.Open("sqlite3", "./data/tmp.db")
 

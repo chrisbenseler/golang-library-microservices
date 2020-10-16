@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"errors"
 	"librarymanager/books/common"
 	"librarymanager/books/domain"
 )
@@ -11,17 +10,17 @@ import (
 type Book interface {
 	AddOne(title string, year int, createdByID string) (*domain.Book, common.CustomError)
 	GetByID(id string) (*domain.Book, common.CustomError)
-	All() (*[]domain.Book, error)
-	Destroy(id string, createdByID string) error
+	All() (*[]domain.Book, common.CustomError)
+	Destroy(id string, createdByID string) common.CustomError
 }
 
 type serviceStruct struct {
 	repository domain.Repository
-	rdb        Broker
+	rdb        common.Broker
 }
 
 //NewBooksService create a new book use case
-func NewBooksService(repository domain.Repository, broker Broker) Book {
+func NewBooksService(repository domain.Repository, broker common.Broker) Book {
 
 	return &serviceStruct{
 		repository: repository,
@@ -45,17 +44,17 @@ func (u *serviceStruct) GetByID(id string) (*domain.Book, common.CustomError) {
 }
 
 //All method
-func (u *serviceStruct) All() (*[]domain.Book, error) {
+func (u *serviceStruct) All() (*[]domain.Book, common.CustomError) {
 	return u.repository.All()
 }
 
 //Destroy destroy a book
-func (u *serviceStruct) Destroy(id string, createdByID string) error {
+func (u *serviceStruct) Destroy(id string, createdByID string) common.CustomError {
 
 	book, _ := u.repository.Get(id)
 
 	if book.CreatedByID != createdByID {
-		return errors.New("This user cannot perform this action")
+		return common.NewUnauthorizedError("User cannot perform this action on this resource")
 	}
 
 	err := u.repository.Destroy(id)

@@ -8,12 +8,14 @@ import (
 type CustomError interface {
 	Message() string
 	Status() int
+	Causes() []interface{}
 }
 
 type customError struct {
-	ErrMessage string `json:"message"`
-	ErrStatus  int    `json:"status"`
-	ErrError   string `json:"error"`
+	ErrMessage string        `json:"message"`
+	ErrStatus  int           `json:"status"`
+	ErrError   string        `json:"error"`
+	ErrCauses  []interface{} `json:"causes"`
 }
 
 func (e customError) Message() string {
@@ -22,6 +24,10 @@ func (e customError) Message() string {
 
 func (e customError) Status() int {
 	return e.ErrStatus
+}
+
+func (e customError) Causes() []interface{} {
+	return e.ErrCauses
 }
 
 //NewBadRequestError new bad request (usually bad data)
@@ -49,6 +55,18 @@ func NewInternalServerError(message string, err error) CustomError {
 		ErrStatus:  http.StatusInternalServerError,
 		ErrError:   "internal_server_error",
 	}
+	if err != nil {
+		result.ErrCauses = append(result.ErrCauses, err.Error())
+	}
 
 	return result
+}
+
+//NewUnauthorizedError unauthorized
+func NewUnauthorizedError(message string) CustomError {
+	return customError{
+		ErrMessage: message,
+		ErrStatus:  http.StatusUnauthorized,
+		ErrError:   "unauthorized",
+	}
 }

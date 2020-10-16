@@ -16,7 +16,7 @@ func MapUrls(router *gin.Engine, booksController Books, middleware middlewares.M
 
 		apiRoutes.GET("/", booksController.All)
 
-		apiRoutes.POST("/", booksController.Create)
+		apiRoutes.POST("/", middleware.CheckJWTToken, booksController.Create)
 
 		apiRoutes.DELETE("/:id", middleware.CheckJWTToken, booksController.Delete)
 
