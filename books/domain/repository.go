@@ -2,6 +2,7 @@ package domain
 
 import (
 	"database/sql"
+	"errors"
 	"librarymanager/books/common"
 	"math/rand"
 	"time"
@@ -9,8 +10,8 @@ import (
 
 //Repository book repository (persistence)
 type Repository interface {
-	Save(title string, year int, createdByID string) (*Book, error)
-	Get(id string) (*Book, common.Error)
+	Save(title string, year int, createdByID string) (*Book, common.CustomError)
+	Get(id string) (*Book, common.CustomError)
 	All() (*[]Book, error)
 	Destroy(id string) error
 }
@@ -31,21 +32,21 @@ func NewBookRepository(database *sql.DB) Repository {
 }
 
 //Save book
-func (r *repositoryStruct) Save(title string, year int, createdByID string) (*Book, error) {
+func (r *repositoryStruct) Save(title string, year int, createdByID string) (*Book, common.CustomError) {
 
 	book := NewBook(GenerateID(), title, year, createdByID)
 
 	statement, _ := r.db.Prepare("INSERT INTO book (id, title, year, createdByID) VALUES (?, ?, ?, ?)")
 
 	if _, err := statement.Exec(book.ID, book.Title, book.Year, book.CreatedByID); err != nil {
-		return nil, err
+		return nil, common.NewInternalServerError("error when tying to save user", errors.New("database error"))
 	}
 
 	return book, nil
 }
 
 //Get get a book by its id
-func (r *repositoryStruct) Get(id string) (*Book, common.Error) {
+func (r *repositoryStruct) Get(id string) (*Book, common.CustomError) {
 
 	book := &Book{}
 

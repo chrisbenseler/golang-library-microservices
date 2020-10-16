@@ -43,7 +43,7 @@ func (r *controllerStruct) Create(c *gin.Context) {
 
 	book, err := r.booksService.AddOne(bookPayload.Title, bookPayload.Year, userID.(string))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(err.Status(), gin.H{"error": err.Message()})
 		return
 	}
 
