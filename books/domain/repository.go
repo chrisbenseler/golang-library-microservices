@@ -3,6 +3,7 @@ package domain
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"librarymanager/books/common"
 	"math/rand"
 	"time"
@@ -14,6 +15,7 @@ type Repository interface {
 	Get(id string) (*Book, common.CustomError)
 	All() (*[]Book, common.CustomError)
 	Destroy(id string) common.CustomError
+	Update(id string, title string, year int) (*Book, common.CustomError)
 }
 
 type repositoryStruct struct {
@@ -50,7 +52,7 @@ func (r *repositoryStruct) Get(id string) (*Book, common.CustomError) {
 
 	book := &Book{}
 
-	rows, err := r.db.Query("SELECT 1 title, year, createdByID FROM book WHERE id = '" + id + "' LIMIT 1")
+	rows, err := r.db.Query("SELECT title, year, createdByID FROM book WHERE id = '" + id + "' LIMIT 1")
 
 	if err != nil {
 		return nil, common.NewBadRequestError("No book found for the given ID")
@@ -111,6 +113,23 @@ func (r *repositoryStruct) Destroy(id string) common.CustomError {
 	}
 	return nil
 
+}
+
+//Update book
+func (r *repositoryStruct) Update(id string, title string, year int) (*Book, common.CustomError) {
+
+	statement, _ := r.db.Prepare("UPDATE book SET title = ?, year = ? WHERE id = ?")
+
+	fmt.Println(id)
+	fmt.Println(title)
+	fmt.Println(year)
+
+	if _, err := statement.Exec(title, year, id); err != nil {
+		fmt.Println(err)
+		return nil, common.NewInternalServerError("error when tying to update book", errors.New("database error"))
+	}
+
+	return r.Get(id)
 }
 
 //GenerateID method

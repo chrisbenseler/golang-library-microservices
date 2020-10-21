@@ -12,6 +12,7 @@ type Book interface {
 	GetByID(id string) (*domain.Book, common.CustomError)
 	All() (*[]domain.Book, common.CustomError)
 	Destroy(id string, createdByID string) common.CustomError
+	Update(id string, title string, year int) (*domain.Book, common.CustomError)
 }
 
 type serviceStruct struct {
@@ -68,6 +69,18 @@ func (u *serviceStruct) Destroy(id string, createdByID string) common.CustomErro
 	}
 
 	return err
+}
+
+//Update method
+func (u *serviceStruct) Update(id string, title string, year int) (*domain.Book, common.CustomError) {
+
+	_, err := u.repository.Get(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return u.repository.Update(id, title, year)
 }
 
 type brokerPayload struct {

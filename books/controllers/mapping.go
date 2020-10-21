@@ -20,6 +20,8 @@ func MapUrls(router *gin.Engine, booksController Books, middleware middlewares.M
 
 		apiRoutes.DELETE("/:id", middleware.CheckJWTToken, booksController.Delete)
 
+		apiRoutes.PUT("/:id", booksController.Update)
+
 	}
 
 	return apiRoutes

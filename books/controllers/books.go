@@ -14,6 +14,7 @@ type Books interface {
 	All(c *gin.Context)
 	Delete(c *gin.Context)
 	GetByID(c *gin.Context)
+	Update(c *gin.Context)
 }
 
 type controllerStruct struct {
@@ -99,4 +100,45 @@ func (r *controllerStruct) GetByID(c *gin.Context) {
 	}
 
 	c.JSON(200, book)
+}
+
+func (r *controllerStruct) Update(c *gin.Context) {
+
+	id := c.Param("id")
+
+	bookPayload := bookPayload{}
+	if err := c.BindJSON(&bookPayload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID, _ := c.Get("user_id")
+
+	if userID == nil {
+		err := common.NewUnauthorizedError("User not authorized")
+		c.JSON(err.Status(), gin.H{"error": err.Message()})
+		return
+	}
+
+	savedBook, err := r.booksService.GetByID(id)
+
+	if err != nil {
+		c.JSON(err.Status(), gin.H{"error": err.Message()})
+		return
+	}
+
+	if savedBook.CreatedByID != userID {
+		err := common.NewUnauthorizedError("User not authorized")
+		c.JSON(err.Status(), gin.H{"error": err.Message()})
+		return
+	}
+
+	book, err := r.booksService.Update(id, bookPayload.Title, bookPayload.Year)
+	if err != nil {
+		c.JSON(err.Status(), gin.H{"error": err.Message()})
+		return
+	}
+
+	c.JSON(201, book)
+
 }
