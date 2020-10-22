@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"librarymanager/books/common"
+	"librarymanager/books/domain"
 	"librarymanager/books/services"
 	"net/http"
 
@@ -28,14 +29,9 @@ func NewBooksController(booksService services.Book) Books {
 	}
 }
 
-type bookPayload struct {
-	Title string `json:"title"`
-	Year  int    `json:"year"`
-}
-
 func (r *controllerStruct) Create(c *gin.Context) {
 
-	bookPayload := bookPayload{}
+	bookPayload := domain.BookDTO{}
 	if err := c.BindJSON(&bookPayload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -49,7 +45,7 @@ func (r *controllerStruct) Create(c *gin.Context) {
 		return
 	}
 
-	book, err := r.booksService.AddOne(bookPayload.Title, bookPayload.Year, userID.(string))
+	book, err := r.booksService.AddOne(bookPayload, userID.(string))
 	if err != nil {
 		c.JSON(err.Status(), gin.H{"error": err.Message()})
 		return
@@ -106,7 +102,7 @@ func (r *controllerStruct) Update(c *gin.Context) {
 
 	id := c.Param("id")
 
-	bookPayload := bookPayload{}
+	bookPayload := domain.BookDTO{}
 	if err := c.BindJSON(&bookPayload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -120,20 +116,14 @@ func (r *controllerStruct) Update(c *gin.Context) {
 		return
 	}
 
-	savedBook, err := r.booksService.GetByID(id)
+	_, err := r.booksService.GetByID(id)
 
 	if err != nil {
 		c.JSON(err.Status(), gin.H{"error": err.Message()})
 		return
 	}
 
-	if savedBook.CreatedByID != userID {
-		err := common.NewUnauthorizedError("User not authorized")
-		c.JSON(err.Status(), gin.H{"error": err.Message()})
-		return
-	}
-
-	book, err := r.booksService.Update(id, bookPayload.Title, bookPayload.Year)
+	book, err := r.booksService.Update(id, bookPayload, userID.(string))
 	if err != nil {
 		c.JSON(err.Status(), gin.H{"error": err.Message()})
 		return
