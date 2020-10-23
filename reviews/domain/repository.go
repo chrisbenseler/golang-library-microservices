@@ -2,14 +2,16 @@ package domain
 
 import (
 	"database/sql"
+	"errors"
+	"librarymanager/reviews/common"
 	"strconv"
 )
 
 //Repository book repository (persistence)
 type Repository interface {
-	Save(entityID string, entityKey string, content string, createdByID string) (Review, error)
-	FindAll(entityID string, entityKey string) ([]Review, error)
-	DestroyByType(entityID string, entityKey string) error
+	Save(entityID string, entityKey string, content string, createdByID string) (*Review, common.CustomError)
+	FindAll(entityID string, entityKey string) (*[]Review, common.CustomError)
+	DestroyByType(entityID string, entityKey string) common.CustomError
 }
 
 type repositoryStruct struct {
@@ -28,7 +30,7 @@ func NewReviewRepository(database *sql.DB) Repository {
 }
 
 //Save review
-func (r *repositoryStruct) Save(entityID string, entityKey string, content string, createdByID string) (Review, error) {
+func (r *repositoryStruct) Save(entityID string, entityKey string, content string, createdByID string) (*Review, common.CustomError) {
 
 	review := NewReview("", content, entityID, entityKey, createdByID)
 
@@ -36,19 +38,27 @@ func (r *repositoryStruct) Save(entityID string, entityKey string, content strin
 
 	result, err := statement.Exec(review.Content, review.EntityID, review.EntityKey, review.CreatedByID)
 
+	if err != nil {
+		return nil, common.NewInternalServerError("error when tying to save user", errors.New("database error"))
+	}
+
 	id, _ := result.LastInsertId()
 
 	review.ID = strconv.FormatInt(int64(id), 10)
 
-	return *review, err
+	return review, nil
 }
 
 //FindAll reviews
-func (r *repositoryStruct) FindAll(entityID string, entityKey string) ([]Review, error) {
+func (r *repositoryStruct) FindAll(entityID string, entityKey string) (*[]Review, common.CustomError) {
 
 	reviews := []Review{}
 
-	rows, _ := r.db.Query("SELECT id, content, createdByID FROM review WHERE entityID='" + entityID + "' AND entityKey='" + entityKey + "'")
+	rows, err := r.db.Query("SELECT id, content, createdByID FROM review WHERE entityID='" + entityID + "' AND entityKey='" + entityKey + "'")
+
+	if err != nil {
+		return nil, common.NewInternalServerError("error when tying to get all users", errors.New("database error"))
+	}
 
 	for rows.Next() {
 		var id string
@@ -59,15 +69,18 @@ func (r *repositoryStruct) FindAll(entityID string, entityKey string) ([]Review,
 		reviews = append(reviews, *review)
 	}
 
-	return reviews, nil
+	return &reviews, nil
 }
 
 //Destroy destroy a book by its id
-func (r *repositoryStruct) DestroyByType(entityID string, entityKey string) error {
+func (r *repositoryStruct) DestroyByType(entityID string, entityKey string) common.CustomError {
 
 	statement, _ := r.db.Prepare("DELETE FROM review WHERE entityID = ? AND entityKey = ?")
 
 	_, err := statement.Exec(entityID, entityKey)
-	return err
+	if err != nil {
+		return common.NewInternalServerError("error when tying to get all users", errors.New("database error"))
+	}
+	return nil
 
 }

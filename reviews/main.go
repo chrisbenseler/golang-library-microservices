@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"librarymanager/reviews/common"
 	"librarymanager/reviews/domain"
 	"net/http"
 	"os"
@@ -23,7 +24,7 @@ func main() {
 
 	fmt.Print("Reviews process")
 
-	broker := domain.NewBroker()
+	broker := common.NewBroker()
 
 	database, _ := sql.Open("sqlite3", "./data/tmp.db")
 
@@ -95,7 +96,7 @@ func main() {
 
 			book, err := usecase.AddBookReview(bookID, payload.Content, userID.(string))
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				c.JSON(err.Status(), gin.H{"error": err.Message()})
 				return
 			}
 

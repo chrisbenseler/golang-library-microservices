@@ -3,22 +3,23 @@ package domain
 import (
 	"encoding/json"
 	"fmt"
+	"librarymanager/reviews/common"
 )
 
 //Usecase reviews use case interface
 type Usecase interface {
-	AddBookReview(bookID string, content string, createdByID string) (Review, error)
-	AllFromBook(bookID string) ([]Review, error)
+	AddBookReview(bookID string, content string, createdByID string) (*Review, common.CustomError)
+	AllFromBook(bookID string) (*[]Review, common.CustomError)
 	Subscriptions()
 }
 
 type usecaseStruct struct {
 	repository Repository
-	broker     Broker
+	broker     common.Broker
 }
 
 //NewReviewUsecase a new book use case
-func NewReviewUsecase(repository Repository, broker Broker) Usecase {
+func NewReviewUsecase(repository Repository, broker common.Broker) Usecase {
 
 	return &usecaseStruct{
 		repository: repository,
@@ -42,12 +43,12 @@ func (u *usecaseStruct) Subscriptions() {
 }
 
 //AddBookReview method
-func (u *usecaseStruct) AddBookReview(bookID string, content string, createdByID string) (Review, error) {
+func (u *usecaseStruct) AddBookReview(bookID string, content string, createdByID string) (*Review, common.CustomError) {
 	return u.repository.Save(bookID, "book", content, createdByID)
 }
 
 //AllFromBook method
-func (u *usecaseStruct) AllFromBook(bookID string) ([]Review, error) {
+func (u *usecaseStruct) AllFromBook(bookID string) (*[]Review, common.CustomError) {
 	return u.repository.FindAll(bookID, "book")
 }
 
