@@ -7,8 +7,8 @@ import (
 	"librarymanager/reviews/domain"
 )
 
-//Service reviews service interface
-type Service interface {
+//Review reviews service interface
+type Review interface {
 	AddBookReview(bookID string, content string, createdByID string) (*domain.Review, common.CustomError)
 	AllFromBook(bookID string) (*[]domain.Review, common.CustomError)
 	Subscriptions()
@@ -20,7 +20,7 @@ type serviceStruct struct {
 }
 
 //NewReviewsService new reviews service
-func NewReviewsService(repository domain.Repository, broker common.Broker) Service {
+func NewReviewsService(repository domain.Repository, broker common.Broker) Review {
 
 	return &serviceStruct{
 		repository: repository,

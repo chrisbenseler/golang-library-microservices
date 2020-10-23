@@ -4,13 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"librarymanager/reviews/common"
+	"librarymanager/reviews/controllers"
 	"librarymanager/reviews/domain"
+	"librarymanager/reviews/middlewares"
 	"librarymanager/reviews/services"
-	"net/http"
-	"os"
-	"strings"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
@@ -31,11 +29,12 @@ func main() {
 
 	repository := domain.NewReviewRepository(database)
 
-	//usecase := domain.NewReviewUsecase(repository, broker)
-
 	reviewsService := services.NewReviewsService(repository, broker)
+	keysService := services.NewKeysService()
 
-	//usecase.Subscriptions()
+	middleware := middlewares.NewMiddleware(keysService)
+	reviewsController := controllers.NewReviewsController(reviewsService)
+
 	reviewsService.Subscriptions()
 
 	router := gin.Default()
@@ -52,63 +51,7 @@ func main() {
 		})
 	})
 
-	keysService := services.NewKeysService()
-
-	checkJWTToken := func(c *gin.Context) {
-		bearToken := c.GetHeader("Authorization")
-
-		strArr := strings.Split(bearToken, " ")
-		if len(strArr) == 2 {
-
-			token, err := keysService.VerifyToken(strArr[1], os.Getenv("ACCESS_SECRET"))
-			if err != nil {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-				return
-			}
-
-			claims, _ := token.Claims.(jwt.MapClaims)
-
-			c.Set("user_id", claims["user_id"])
-
-			return
-
-		}
-
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token inválido"})
-		return
-	}
-
-	apiRoutes := router.Group("/api/reviews")
-	{
-		apiRoutes.GET("/books/:id", func(c *gin.Context) {
-			bookID := c.Param("id")
-			reviews, _ := reviewsService.AllFromBook(bookID)
-			c.JSON(200, reviews)
-		})
-
-		apiRoutes.POST("/books/:id", checkJWTToken, func(c *gin.Context) {
-
-			bookID := c.Param("id")
-
-			payload := reviewPayload{}
-			if err := c.BindJSON(&payload); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-
-			userID, _ := c.Get("user_id")
-
-			book, err := reviewsService.AddBookReview(bookID, payload.Content, userID.(string))
-			if err != nil {
-				c.JSON(err.Status(), gin.H{"error": err.Message()})
-				return
-			}
-
-			c.JSON(201, book)
-
-		})
-
-	}
+	apiRoutes := controllers.MapUrls(router, reviewsController, middleware)
 
 	apiRoutes.Use(cors.New(config))
 
