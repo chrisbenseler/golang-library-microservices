@@ -28,12 +28,12 @@ func NewUsecase(broker Broker) Usecase {
 
 func (u *usecaseStruct) Authenticate(email string, password string) (map[string]string, error) {
 
-	if email != "root@gmail.com" || password != "root" {
+	userID := ""
 
+	if email != "root@gmail.com" || password != "root" {
 		return map[string]string{}, errors.New("Credenciais inválidas")
 	}
-
-	userID := "root"
+	userID = "root"
 
 	ts, err := CreateToken(userID)
 	if err != nil {

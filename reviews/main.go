@@ -34,8 +34,12 @@ func main() {
 	usecase.Subscriptions()
 
 	router := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AddAllowHeaders("Authorization", "Access-Control-Allow-Headers")
+	config.AddExposeHeaders("Authorization")
 
-	router.Use(cors.Default())
+	router.Use(cors.New(config))
 
 	router.GET("/api/reviewsping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -101,7 +105,7 @@ func main() {
 
 	}
 
-	apiRoutes.Use(cors.Default())
+	apiRoutes.Use(cors.New(config))
 
 	router.Run(":3000")
 }

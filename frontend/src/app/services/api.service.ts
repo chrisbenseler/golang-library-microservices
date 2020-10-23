@@ -17,13 +17,20 @@ export class ApiService {
     return this.http.get(environment.api + "books/");
   }
 
-  createBook(title: string, year: number) {
+  _buildHeaders() {
     const token = this.storageService.getToken();
 
     const headers = new HttpHeaders({
       'Access-Control-Allow-Headers': 'Authorization',
       'Authorization': "Bearer " + token,
     });
+
+    return headers;
+  }
+
+  createBook(title: string, year: number) {
+    
+    const headers = this._buildHeaders();
 
     return this.http.post(environment.api + "books/", { title, year }, { headers });
   }
@@ -33,9 +40,12 @@ export class ApiService {
   }
 
   createReview(entityKey: string, entityId: string, content: string) {
+    const headers = this._buildHeaders();
+    console.log(headers)
     return this.http.post(
       environment.api + "reviews/" + entityKey + "/" + entityId,
-      { content }
+      { content },
+      { headers }
     );
   }
 
