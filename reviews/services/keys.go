@@ -1,4 +1,4 @@
-package domain
+package services
 
 import (
 	"fmt"
@@ -6,25 +6,21 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-//Service books service interface
-type Service interface {
+//Keys service interface
+type Keys interface {
 	VerifyToken(tokenString string, secretKey string) (*jwt.Token, error)
 }
 
-type usecaseService struct {
-	//repository Repository
+type keysService struct {
 }
 
-//NewReviewService create a new book service
-func NewReviewService() Service {
-
-	return &usecaseService{
-		//repository: repository,
-	}
+//NewKeysService create a new keys service
+func NewKeysService() Keys {
+	return &keysService{}
 }
 
 //VerifyToken check is token is valid
-func (u *usecaseService) VerifyToken(tokenString string, secretKey string) (*jwt.Token, error) {
+func (u *keysService) VerifyToken(tokenString string, secretKey string) (*jwt.Token, error) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		//Make sure that the token method conform to "SigningMethodHMAC"

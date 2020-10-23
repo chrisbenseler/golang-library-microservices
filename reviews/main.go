@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"librarymanager/reviews/common"
 	"librarymanager/reviews/domain"
+	"librarymanager/reviews/services"
 	"net/http"
 	"os"
 	"strings"
@@ -30,9 +31,12 @@ func main() {
 
 	repository := domain.NewReviewRepository(database)
 
-	usecase := domain.NewReviewUsecase(repository, broker)
+	//usecase := domain.NewReviewUsecase(repository, broker)
 
-	usecase.Subscriptions()
+	reviewsService := services.NewReviewsService(repository, broker)
+
+	//usecase.Subscriptions()
+	reviewsService.Subscriptions()
 
 	router := gin.Default()
 	config := cors.DefaultConfig()
@@ -48,7 +52,7 @@ func main() {
 		})
 	})
 
-	service := domain.NewReviewService()
+	keysService := services.NewKeysService()
 
 	checkJWTToken := func(c *gin.Context) {
 		bearToken := c.GetHeader("Authorization")
@@ -56,7 +60,7 @@ func main() {
 		strArr := strings.Split(bearToken, " ")
 		if len(strArr) == 2 {
 
-			token, err := service.VerifyToken(strArr[1], os.Getenv("ACCESS_SECRET"))
+			token, err := keysService.VerifyToken(strArr[1], os.Getenv("ACCESS_SECRET"))
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 				return
@@ -78,7 +82,7 @@ func main() {
 	{
 		apiRoutes.GET("/books/:id", func(c *gin.Context) {
 			bookID := c.Param("id")
-			reviews, _ := usecase.AllFromBook(bookID)
+			reviews, _ := reviewsService.AllFromBook(bookID)
 			c.JSON(200, reviews)
 		})
 
@@ -94,7 +98,7 @@ func main() {
 
 			userID, _ := c.Get("user_id")
 
-			book, err := usecase.AddBookReview(bookID, payload.Content, userID.(string))
+			book, err := reviewsService.AddBookReview(bookID, payload.Content, userID.(string))
 			if err != nil {
 				c.JSON(err.Status(), gin.H{"error": err.Message()})
 				return
