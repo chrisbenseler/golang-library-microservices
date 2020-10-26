@@ -1,4 +1,4 @@
-package domain
+package common
 
 import (
 	"context"
@@ -48,17 +48,6 @@ func NewBroker() Broker {
 	}
 }
 
-//Set set key/value
-func (b *brokerStruct) Set(key string, message interface{}, time time.Duration) error {
-	redisError := b.rdb.Set(ctx, key, message, time).Err()
-
-	if redisError != nil {
-		return redisError
-	}
-
-	return nil
-}
-
 //Publish publish some message in a channel
 func (b *brokerStruct) Publish(channel string, message interface{}) *redis.IntCmd {
 	return b.rdb.Publish(ctx, channel, message)
@@ -84,4 +73,15 @@ func (b *brokerStruct) Subscribe(channel string, cb func(string)) {
 
 	}()
 
+}
+
+//Set set key/value
+func (b *brokerStruct) Set(key string, message interface{}, time time.Duration) error {
+	redisError := b.rdb.Set(ctx, key, message, time).Err()
+
+	if redisError != nil {
+		return redisError
+	}
+
+	return nil
 }

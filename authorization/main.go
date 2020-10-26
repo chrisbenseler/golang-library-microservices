@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"librarymanager/authorization/common"
 	"librarymanager/authorization/domain"
 	"net/http"
 
@@ -22,7 +23,7 @@ func main() {
 
 	router.Use(cors.Default())
 
-	broker := domain.NewBroker()
+	broker := common.NewBroker()
 
 	usecase := domain.NewUsecase(broker)
 
@@ -40,7 +41,7 @@ func main() {
 			tokens, err := usecase.Authenticate(authorizationPayload.Email, authorizationPayload.Password)
 
 			if err != nil {
-				c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+				c.JSON(err.Status(), gin.H{"error": err.Message()})
 				return
 			}
 

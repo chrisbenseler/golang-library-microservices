@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"errors"
+	"librarymanager/authorization/common"
 	"os"
 	"time"
 
@@ -11,38 +11,38 @@ import (
 
 //Usecase struct
 type Usecase interface {
-	Authenticate(email string, password string) (map[string]string, error)
+	Authenticate(email string, password string) (map[string]string, common.CustomError)
 }
 
 type usecaseStruct struct {
-	broker Broker
+	broker common.Broker
 }
 
 //NewUsecase create new use case
-func NewUsecase(broker Broker) Usecase {
+func NewUsecase(broker common.Broker) Usecase {
 
 	return &usecaseStruct{
 		broker: broker,
 	}
 }
 
-func (u *usecaseStruct) Authenticate(email string, password string) (map[string]string, error) {
+func (u *usecaseStruct) Authenticate(email string, password string) (map[string]string, common.CustomError) {
 
 	userID := ""
 
 	if email != "root@gmail.com" || password != "root" {
-		return map[string]string{}, errors.New("Credenciais inválidas")
+		return map[string]string{}, common.NewUnauthorizedError("Credenciais inválidas")
 	}
 	userID = "root"
 
 	ts, err := CreateToken(userID)
 	if err != nil {
-		return map[string]string{}, err
+		return map[string]string{}, common.NewInternalServerError(err.Error(), err)
 	}
 
 	saveErr := CreateAuth(userID, ts, u.broker)
 	if saveErr != nil {
-		return map[string]string{}, saveErr
+		return map[string]string{}, common.NewInternalServerError(err.Error(), saveErr)
 	}
 
 	tokens := map[string]string{
@@ -91,7 +91,7 @@ func CreateToken(userKey string) (*TokenDetails, error) {
 }
 
 //CreateAuth create auth in broker
-func CreateAuth(userID string, td *TokenDetails, broker Broker) error {
+func CreateAuth(userID string, td *TokenDetails, broker common.Broker) error {
 	at := time.Unix(td.AtExpires, 0) //converting Unix to UTC(to Time object)
 	rt := time.Unix(td.RtExpires, 0)
 	now := time.Now()
