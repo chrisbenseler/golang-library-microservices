@@ -18,7 +18,7 @@ type serviceStruct struct {
 	broker common.Broker
 }
 
-//NewAuthorizartionService create new use case
+//NewAuthorizationService create new use case
 func NewAuthorizationService(broker common.Broker) Authorization {
 
 	return &serviceStruct{
