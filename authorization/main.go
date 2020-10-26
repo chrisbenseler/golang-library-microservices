@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"librarymanager/authorization/common"
+	"librarymanager/authorization/controllers"
 	"librarymanager/authorization/domain"
-	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -17,41 +17,24 @@ type authorizationPayload struct {
 
 func main() {
 
-	fmt.Print("Authroization process")
-
-	router := gin.Default()
-
-	router.Use(cors.Default())
+	fmt.Print("Authorization process")
 
 	broker := common.NewBroker()
 
 	usecase := domain.NewUsecase(broker)
 
-	apiRoutes := router.Group("/api/authorization")
-	{
+	authorizationController := controllers.NewAuthorizationController(usecase)
 
-		apiRoutes.POST("/signin", func(c *gin.Context) {
+	router := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AddAllowHeaders("Authorization", "Access-Control-Allow-Headers")
+	config.AddExposeHeaders("Authorization")
+	router.Use(cors.New(config))
 
-			authorizationPayload := authorizationPayload{}
-			if err := c.BindJSON(&authorizationPayload); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
+	apiRoutes := controllers.MapUrls(router, authorizationController)
 
-			tokens, err := usecase.Authenticate(authorizationPayload.Email, authorizationPayload.Password)
-
-			if err != nil {
-				c.JSON(err.Status(), gin.H{"error": err.Message()})
-				return
-			}
-
-			c.JSON(http.StatusOK, gin.H{"tokens": tokens})
-
-		})
-
-	}
-
-	apiRoutes.Use(cors.Default())
+	apiRoutes.Use(cors.New(config))
 
 	router.Run(":3000")
 }
