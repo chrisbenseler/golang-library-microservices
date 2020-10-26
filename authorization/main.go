@@ -4,16 +4,11 @@ import (
 	"fmt"
 	"librarymanager/authorization/common"
 	"librarymanager/authorization/controllers"
-	"librarymanager/authorization/domain"
+	"librarymanager/authorization/services"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
-
-type authorizationPayload struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
 
 func main() {
 
@@ -21,9 +16,9 @@ func main() {
 
 	broker := common.NewBroker()
 
-	usecase := domain.NewUsecase(broker)
+	authorizationService := services.NewAuthorizationService(broker)
 
-	authorizationController := controllers.NewAuthorizationController(usecase)
+	authorizationController := controllers.NewAuthorizationController(authorizationService)
 
 	router := gin.Default()
 	config := cors.DefaultConfig()

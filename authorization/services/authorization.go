@@ -1,4 +1,4 @@
-package domain
+package services
 
 import (
 	"librarymanager/authorization/common"
@@ -9,24 +9,24 @@ import (
 	"github.com/twinj/uuid"
 )
 
-//Usecase struct
-type Usecase interface {
+//Authorization struct
+type Authorization interface {
 	Authenticate(email string, password string) (map[string]string, common.CustomError)
 }
 
-type usecaseStruct struct {
+type serviceStruct struct {
 	broker common.Broker
 }
 
-//NewUsecase create new use case
-func NewUsecase(broker common.Broker) Usecase {
+//NewAuthorizartionService create new use case
+func NewAuthorizationService(broker common.Broker) Authorization {
 
-	return &usecaseStruct{
+	return &serviceStruct{
 		broker: broker,
 	}
 }
 
-func (u *usecaseStruct) Authenticate(email string, password string) (map[string]string, common.CustomError) {
+func (u *serviceStruct) Authenticate(email string, password string) (map[string]string, common.CustomError) {
 
 	userID := ""
 

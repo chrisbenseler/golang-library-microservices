@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"librarymanager/authorization/domain"
+	"librarymanager/authorization/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,11 +13,11 @@ type Authorization interface {
 }
 
 type controllerStruct struct {
-	service domain.Usecase
+	service services.Authorization
 }
 
 //NewAuthorizationController create new controller
-func NewAuthorizationController(service domain.Usecase) Authorization {
+func NewAuthorizationController(service services.Authorization) Authorization {
 	return &controllerStruct{
 		service: service,
 	}
