@@ -48,7 +48,7 @@ func Test_Authorization_Auth(t *testing.T) {
 
 	service := NewAuthorizationService(userRepository, broker)
 
-	authorizationPayload := domain.AuthorizationDTO{
+	authorizationPayload := AuthorizationDTO{
 		Email:    "root@gmail.com",
 		Password: "root",
 	}
@@ -86,6 +86,6 @@ func (m *MockBroker) Publish(channel string, message interface{}) *redis.IntCmd 
 type MockUserRepository struct {
 }
 
-func (r *MockUserRepository) Save(email string, password string) (*domain.User, common.CustomError) {
+func (r *MockUserRepository) Save(user *domain.User) (*domain.User, common.CustomError) {
 	return nil, nil
 }

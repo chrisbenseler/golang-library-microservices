@@ -8,7 +8,7 @@ import (
 
 //UserRepository user repository (persistence)
 type UserRepository interface {
-	Save(email string, password string) (*User, common.CustomError)
+	Save(user *User) (*User, common.CustomError)
 }
 
 type userRepositoryStruct struct {
@@ -27,9 +27,7 @@ func NewUserRepository(database *sql.DB) UserRepository {
 }
 
 //Save book
-func (r *userRepositoryStruct) Save(email string, password string) (*User, common.CustomError) {
-
-	user := NewUser(email, password)
+func (r *userRepositoryStruct) Save(user *User) (*User, common.CustomError) {
 
 	statement, _ := r.db.Prepare("INSERT INTO user (email, password) VALUES (?, ?)")
 

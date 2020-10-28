@@ -3,6 +3,7 @@ package services
 import (
 	"librarymanager/authorization/common"
 	"librarymanager/authorization/domain"
+	"librarymanager/authorization/utils"
 	"os"
 	"time"
 
@@ -12,7 +13,8 @@ import (
 
 //Authorization struct
 type Authorization interface {
-	Authenticate(authorizationPayload domain.AuthorizationDTO) (map[string]string, common.CustomError)
+	Authenticate(authorizationPayload AuthorizationDTO) (map[string]string, common.CustomError)
+	CreateUser(userDTO UserDTO) (*domain.User, common.CustomError)
 }
 
 type serviceStruct struct {
@@ -30,12 +32,15 @@ func NewAuthorizationService(userRepository domain.UserRepository, broker common
 }
 
 //CreateUser create a new user
-func CreateUser(email string, password string) common.CustomError {
+func (u *serviceStruct) CreateUser(userDTO UserDTO) (*domain.User, common.CustomError) {
 
-	return nil
+	user := domain.NewUser(userDTO.Email, utils.GetMd5(userDTO.Password))
+
+	return u.userRepository.Save(user)
+
 }
 
-func (u *serviceStruct) Authenticate(authorizationPayload domain.AuthorizationDTO) (map[string]string, common.CustomError) {
+func (u *serviceStruct) Authenticate(authorizationPayload AuthorizationDTO) (map[string]string, common.CustomError) {
 
 	userID := ""
 

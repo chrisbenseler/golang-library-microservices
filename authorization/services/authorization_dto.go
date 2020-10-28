@@ -1,4 +1,4 @@
-package domain
+package services
 
 //AuthorizationDTO auth payload dto
 type AuthorizationDTO struct {

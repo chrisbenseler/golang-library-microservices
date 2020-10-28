@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"librarymanager/authorization/domain"
 	"librarymanager/authorization/services"
 	"net/http"
 
@@ -26,7 +25,7 @@ func NewAuthorizationController(service services.Authorization) Authorization {
 
 //SignIn sign in user
 func (r *controllerStruct) SignIn(c *gin.Context) {
-	authorizationPayload := domain.AuthorizationDTO{}
+	authorizationPayload := services.AuthorizationDTO{}
 	if err := c.BindJSON(&authorizationPayload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
