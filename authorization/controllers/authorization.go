@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"librarymanager/authorization/domain"
 	"librarymanager/authorization/services"
 	"net/http"
 
@@ -25,13 +26,13 @@ func NewAuthorizationController(service services.Authorization) Authorization {
 
 //SignIn sign in user
 func (r *controllerStruct) SignIn(c *gin.Context) {
-	authorizationPayload := authorizationPayload{}
+	authorizationPayload := domain.AuthorizationDTO{}
 	if err := c.BindJSON(&authorizationPayload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	tokens, err := r.service.Authenticate(authorizationPayload.Email, authorizationPayload.Password)
+	tokens, err := r.service.Authenticate(authorizationPayload)
 
 	if err != nil {
 		c.JSON(err.Status(), gin.H{"error": err.Message()})
@@ -39,9 +40,4 @@ func (r *controllerStruct) SignIn(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"tokens": tokens})
-}
-
-type authorizationPayload struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
 }

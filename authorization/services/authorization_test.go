@@ -48,7 +48,11 @@ func Test_Authorization_Auth(t *testing.T) {
 
 	service := NewAuthorizationService(userRepository, broker)
 
-	td, err := service.Authenticate("root@gmail.com", "root")
+	authorizationPayload := domain.AuthorizationDTO{
+		Email:    "root@gmail.com",
+		Password: "root",
+	}
+	td, err := service.Authenticate(authorizationPayload)
 
 	if err != nil {
 		t.Error("Error when authenticate root")

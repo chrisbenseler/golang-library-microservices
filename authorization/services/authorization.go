@@ -12,7 +12,7 @@ import (
 
 //Authorization struct
 type Authorization interface {
-	Authenticate(email string, password string) (map[string]string, common.CustomError)
+	Authenticate(authorizationPayload domain.AuthorizationDTO) (map[string]string, common.CustomError)
 }
 
 type serviceStruct struct {
@@ -35,11 +35,11 @@ func CreateUser(email string, password string) common.CustomError {
 	return nil
 }
 
-func (u *serviceStruct) Authenticate(email string, password string) (map[string]string, common.CustomError) {
+func (u *serviceStruct) Authenticate(authorizationPayload domain.AuthorizationDTO) (map[string]string, common.CustomError) {
 
 	userID := ""
 
-	if email != "root@gmail.com" || password != "root" {
+	if authorizationPayload.Email != "root@gmail.com" || authorizationPayload.Password != "root" {
 		return map[string]string{}, common.NewUnauthorizedError("Credenciais inválidas")
 	}
 	userID = "root"
