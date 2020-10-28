@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"librarymanager/authorization/common"
-	"librarymanager/authorization/controllers"
 	"net/http/httptest"
 	"testing"
 
@@ -14,7 +13,7 @@ func Test_Authorization_SignIn(t *testing.T) {
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 
 	authorizationService := new(MockService)
-	controller := controllers.NewAuthorizationController(authorizationService)
+	controller := NewAuthorizationController(authorizationService)
 
 	controller.SignIn(c)
 }

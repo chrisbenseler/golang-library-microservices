@@ -2,6 +2,7 @@ package services
 
 import (
 	"librarymanager/authorization/common"
+	"librarymanager/authorization/domain"
 	"os"
 	"time"
 
@@ -15,15 +16,23 @@ type Authorization interface {
 }
 
 type serviceStruct struct {
-	broker common.Broker
+	userRepository domain.UserRepository
+	broker         common.Broker
 }
 
 //NewAuthorizationService create new use case
-func NewAuthorizationService(broker common.Broker) Authorization {
+func NewAuthorizationService(userRepository domain.UserRepository, broker common.Broker) Authorization {
 
 	return &serviceStruct{
-		broker: broker,
+		userRepository: userRepository,
+		broker:         broker,
 	}
+}
+
+//CreateUser create a new user
+func CreateUser(email string, password string) common.CustomError {
+
+	return nil
 }
 
 func (u *serviceStruct) Authenticate(email string, password string) (map[string]string, common.CustomError) {

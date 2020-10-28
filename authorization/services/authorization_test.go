@@ -1,6 +1,8 @@
 package services
 
 import (
+	"librarymanager/authorization/common"
+	"librarymanager/authorization/domain"
 	"testing"
 	"time"
 
@@ -42,7 +44,9 @@ func Test_Authorization_Auth(t *testing.T) {
 
 	broker := new(MockBroker)
 
-	service := NewAuthorizationService(broker)
+	userRepository := new(MockUserRepository)
+
+	service := NewAuthorizationService(userRepository, broker)
 
 	td, err := service.Authenticate("root@gmail.com", "root")
 
@@ -73,4 +77,11 @@ func (m *MockBroker) Publish(channel string, message interface{}) *redis.IntCmd 
 
 	intCmd := &redis.IntCmd{}
 	return intCmd
+}
+
+type MockUserRepository struct {
+}
+
+func (r *MockUserRepository) Save(email string, password string) (*domain.User, common.CustomError) {
+	return nil, nil
 }
