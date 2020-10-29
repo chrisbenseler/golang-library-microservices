@@ -9,7 +9,7 @@ import (
 
 //Authorization controller interface
 type Authorization interface {
-	SignIn(c *gin.Context)
+	SignIn(*gin.Context)
 }
 
 type controllerStruct struct {

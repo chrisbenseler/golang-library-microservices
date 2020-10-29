@@ -8,7 +8,7 @@ import (
 
 //UserRepository user repository (persistence)
 type UserRepository interface {
-	Save(user *User) (*User, common.CustomError)
+	Save(*User) (*User, common.CustomError)
 }
 
 type userRepositoryStruct struct {

@@ -12,9 +12,9 @@ import (
 
 //Broker broker interface
 type Broker interface {
-	Publish(channel string, message interface{}) *redis.IntCmd
-	Subscribe(channel string, cb func(string))
-	Set(key string, message interface{}, time time.Duration) error
+	Publish(string, interface{}) *redis.IntCmd
+	Subscribe(string, func(string))
+	Set(string, interface{}, time.Duration) error
 }
 
 type brokerStruct struct {

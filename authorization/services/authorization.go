@@ -13,8 +13,8 @@ import (
 
 //Authorization struct
 type Authorization interface {
-	Authenticate(authorizationPayload AuthorizationDTO) (map[string]string, common.CustomError)
-	CreateUser(userDTO UserDTO) (*domain.User, common.CustomError)
+	Authenticate(AuthorizationDTO) (map[string]string, common.CustomError)
+	CreateUser(UserDTO) (*domain.User, common.CustomError)
 }
 
 type serviceStruct struct {
