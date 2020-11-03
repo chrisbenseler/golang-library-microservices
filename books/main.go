@@ -26,6 +26,7 @@ func main() {
 	database, _ := sql.Open("sqlite3", "./data/tmp.db")
 
 	repository := domain.NewBookRepository(database)
+	repository.Initialize()
 
 	booksService := services.NewBooksService(repository, broker)
 	middleware := middlewares.NewMiddleware(keysService)

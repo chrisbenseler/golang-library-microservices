@@ -16,6 +16,7 @@ type BookRepository interface {
 	All() (*[]Book, common.CustomError)
 	Destroy(string) common.CustomError
 	Update(string, string, int) (*Book, common.CustomError)
+	Initialize() common.CustomError
 }
 
 type repositoryStruct struct {
@@ -25,12 +26,18 @@ type repositoryStruct struct {
 //NewBookRepository create a new book repository
 func NewBookRepository(database *sql.DB) BookRepository {
 
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS book (id STRING PRIMARY KEY, title TEXT, year INTEGER, createdByID TEXT)")
-	statement.Exec()
-
 	return &repositoryStruct{
 		db: database,
 	}
+}
+
+func (r *repositoryStruct) Initialize() common.CustomError {
+	statement, err := r.db.Prepare("CREATE TABLE IF NOT EXISTS book (id STRING PRIMARY KEY, title TEXT, year INTEGER, createdByID TEXT)")
+	if err != nil {
+		return common.NewInternalServerError("error when trying to create database table", errors.New("database error"))
+	}
+	statement.Exec()
+	return nil
 }
 
 //Save book
@@ -52,10 +59,10 @@ func (r *repositoryStruct) Get(id string) (*Book, common.CustomError) {
 
 	book := &Book{}
 
-	rows, err := r.db.Query("SELECT title, year, createdByID FROM book WHERE id = '" + id + "' LIMIT 1")
+	rows, err := r.db.Query("SELECT title, year, createdByID FROM book WHERE id = ? LIMIT 1", id)
 
 	if err != nil {
-		return nil, common.NewBadRequestError("No book found for the given ID")
+		return nil, common.NewNotFoundError("No book found for the given ID")
 	}
 
 	for rows.Next() {
