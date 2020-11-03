@@ -11,11 +11,11 @@ import (
 
 //Repository book repository (persistence)
 type Repository interface {
-	Save(title string, year int, createdByID string) (*Book, common.CustomError)
-	Get(id string) (*Book, common.CustomError)
+	Save(string, int, string) (*Book, common.CustomError)
+	Get(string) (*Book, common.CustomError)
 	All() (*[]Book, common.CustomError)
-	Destroy(id string) common.CustomError
-	Update(id string, title string, year int) (*Book, common.CustomError)
+	Destroy(string) common.CustomError
+	Update(string, string, int) (*Book, common.CustomError)
 }
 
 type repositoryStruct struct {
