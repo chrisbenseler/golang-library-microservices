@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-//Repository book repository (persistence)
-type Repository interface {
+//BookRepository book repository (persistence)
+type BookRepository interface {
 	Save(string, int, string) (*Book, common.CustomError)
 	Get(string) (*Book, common.CustomError)
 	All() (*[]Book, common.CustomError)
@@ -23,7 +23,7 @@ type repositoryStruct struct {
 }
 
 //NewBookRepository create a new book repository
-func NewBookRepository(database *sql.DB) Repository {
+func NewBookRepository(database *sql.DB) BookRepository {
 
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS book (id STRING PRIMARY KEY, title TEXT, year INTEGER, createdByID TEXT)")
 	statement.Exec()

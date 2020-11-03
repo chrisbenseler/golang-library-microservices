@@ -16,12 +16,12 @@ type Book interface {
 }
 
 type serviceStruct struct {
-	repository domain.Repository
+	repository domain.BookRepository
 	rdb        common.Broker
 }
 
 //NewBooksService create a new book use case
-func NewBooksService(repository domain.Repository, broker common.Broker) Book {
+func NewBooksService(repository domain.BookRepository, broker common.Broker) Book {
 
 	return &serviceStruct{
 		repository: repository,
