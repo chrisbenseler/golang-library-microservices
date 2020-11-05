@@ -9,6 +9,7 @@ import (
 //UserRepository user repository (persistence)
 type UserRepository interface {
 	Get(string) (*User, common.CustomError)
+	GetByEmail(string) (*User, common.CustomError)
 	Initialize() common.CustomError
 }
 
@@ -36,22 +37,32 @@ func (r *repositoryStruct) Initialize() common.CustomError {
 //Get get a user by its id
 func (r *repositoryStruct) Get(id string) (*User, common.CustomError) {
 
-	user := &User{}
-
-	var email string
-	var fullName string
-	var receivedID string
+	user := NewUser("", "")
 
 	row := r.db.QueryRow(`SELECT email, fullName FROM user WHERE id=$1`, id)
 
-	err := row.Scan(&receivedID, &email, &fullName)
+	err := row.Scan(&user.ID, &user.Email, &user.FullName)
 
 	if err != nil {
 		return nil, common.NewNotFoundError("No user found for the given ID")
 	}
 
-	user = NewUser(email, fullName)
-	user.ID = receivedID
+	return user, nil
+
+}
+
+//Get get a user by its email
+func (r *repositoryStruct) GetByEmail(email string) (*User, common.CustomError) {
+
+	user := NewUser("", "")
+
+	row := r.db.QueryRow(`SELECT id, email, fullName FROM user WHERE email=$1`, email)
+
+	err := row.Scan(&user.ID, &user.Email, &user.FullName)
+
+	if err != nil {
+		return nil, common.NewNotFoundError("No user found for the given email")
+	}
 
 	return user, nil
 
