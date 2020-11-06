@@ -1,6 +1,8 @@
 package services
 
 import (
+	"encoding/json"
+	"fmt"
 	"librarymanager/authorization/common"
 	"librarymanager/authorization/domain"
 	"librarymanager/authorization/utils"
@@ -34,13 +36,28 @@ func NewAuthorizationService(userRepository domain.UserRepository, broker common
 //CreateUser create a new user
 func (u *serviceStruct) CreateUser(userDTO UserDTO) (*domain.User, common.CustomError) {
 
+	type BrokerUser struct {
+		Email string
+	}
+
 	if len(userDTO.Password) < 6 {
 		return nil, common.NewBadRequestError("Invalid password")
 	}
 
 	user := domain.NewUser(userDTO.Email, utils.GetMd5(userDTO.Password))
 
-	return u.userRepository.Save(user)
+	savedUser, err := u.userRepository.Save(user)
+	if err != nil {
+		return nil, err
+	}
+
+	payload := common.BrokerPayloadDTO{ID: savedUser.ID, Extra: savedUser.Email}
+	b, _ := json.Marshal(payload)
+
+	cmd := u.broker.Publish("authorization.signup", b)
+
+	fmt.Print(cmd)
+	return savedUser, nil
 
 }
 

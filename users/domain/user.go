@@ -2,7 +2,7 @@ package domain
 
 //User user model
 type User struct {
-	ID       string `json:"id"`
+	ID       int    `json:"id"`
 	Email    string `json:"email"`
 	FullName string `json:"fullName"`
 }
