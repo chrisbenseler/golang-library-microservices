@@ -9,6 +9,7 @@ type User struct {
 
 //NewUser new user entity
 func NewUser(email string, password string) *User {
+
 	return &User{
 		Email:    email,
 		Password: password,

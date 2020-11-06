@@ -10,6 +10,7 @@ func MapUrls(router *gin.Engine, authorizationController Authorization) *gin.Rou
 	apiRoutes := router.Group("/api/authorization")
 	{
 		apiRoutes.POST("/signin", authorizationController.SignIn)
+		apiRoutes.POST("/signup", authorizationController.SignUp)
 	}
 
 	return apiRoutes

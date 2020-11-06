@@ -34,12 +34,17 @@ func NewAuthorizationService(userRepository domain.UserRepository, broker common
 //CreateUser create a new user
 func (u *serviceStruct) CreateUser(userDTO UserDTO) (*domain.User, common.CustomError) {
 
+	if len(userDTO.Password) < 6 {
+		return nil, common.NewBadRequestError("Invalid password")
+	}
+
 	user := domain.NewUser(userDTO.Email, utils.GetMd5(userDTO.Password))
 
 	return u.userRepository.Save(user)
 
 }
 
+//Authenticate authenticate user
 func (u *serviceStruct) Authenticate(authorizationPayload AuthorizationDTO) (map[string]string, common.CustomError) {
 
 	userID := ""

@@ -26,7 +26,7 @@ func NewUserRepository(database *sql.DB) UserRepository {
 	}
 }
 
-//Save book
+//Save user
 func (r *userRepositoryStruct) Save(user *User) (*User, common.CustomError) {
 
 	statement, _ := r.db.Prepare("INSERT INTO user (email, password) VALUES (?, ?)")

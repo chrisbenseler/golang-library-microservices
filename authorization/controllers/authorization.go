@@ -10,6 +10,7 @@ import (
 //Authorization controller interface
 type Authorization interface {
 	SignIn(*gin.Context)
+	SignUp(*gin.Context)
 }
 
 type controllerStruct struct {
@@ -39,4 +40,21 @@ func (r *controllerStruct) SignIn(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"tokens": tokens})
+}
+
+//SignUp sign up user
+func (r *controllerStruct) SignUp(c *gin.Context) {
+	userPayload := services.UserDTO{}
+	if err := c.BindJSON(&userPayload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := r.service.CreateUser(userPayload)
+	if err != nil {
+		c.JSON(err.Status(), gin.H{"error": err.Message()})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
