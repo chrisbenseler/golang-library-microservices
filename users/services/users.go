@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"librarymanager/users/common"
 	"librarymanager/users/domain"
+	"strconv"
 )
 
 //Users users service interface
 type Users interface {
 	Subscriptions()
-	Create(string, string) (*domain.User, common.CustomError)
+	//Create(string, string) (*domain.User, common.CustomError)
 }
 
 type serviceStruct struct {
@@ -39,18 +40,21 @@ func (u *serviceStruct) Subscriptions() {
 
 		json.Unmarshal([]byte(data), &payload)
 
-		_, err := u.userRepository.Save(payload.Extra, "")
+		id, _ := strconv.Atoi(payload.ID)
+		savedUser, err := u.userRepository.Save(id, payload.Extra, "")
 
 		if err != nil {
 			fmt.Println("Broker - error when trying to create new user", err)
 			return
 		}
-		//fmt.Println("Broker - create new user", payload.Extra)
+		fmt.Println("Broker - create new user", savedUser)
 	})
 
 }
 
+/*
 func (u *serviceStruct) Create(email string, fullName string) (*domain.User, common.CustomError) {
 
-	return u.userRepository.Save(email, fullName)
+	return u.userRepository.Save(0, email, fullName)
 }
+*/
