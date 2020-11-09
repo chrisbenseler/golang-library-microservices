@@ -16,7 +16,7 @@ import (
 
 //Authorization struct
 type Authorization interface {
-	Authenticate(AuthorizationDTO) (map[string]string, common.CustomError)
+	Authenticate(AuthorizationDTO) (*map[string]string, common.CustomError)
 	CreateUser(UserDTO) (*domain.User, common.CustomError)
 }
 
@@ -41,9 +41,8 @@ func (u *serviceStruct) CreateUser(userDTO UserDTO) (*domain.User, common.Custom
 		return nil, common.NewBadRequestError("Invalid password")
 	}
 
-	existingUser, existinUserError := u.userRepository.GetByEmail(userDTO.Email)
+	existingUser, _ := u.userRepository.GetByEmail(userDTO.Email)
 
-	fmt.Println(existinUserError)
 	if existingUser != nil {
 		return nil, common.NewBadRequestError("User already exists")
 	}
@@ -67,23 +66,32 @@ func (u *serviceStruct) CreateUser(userDTO UserDTO) (*domain.User, common.Custom
 }
 
 //Authenticate authenticate user
-func (u *serviceStruct) Authenticate(authorizationPayload AuthorizationDTO) (map[string]string, common.CustomError) {
+func (u *serviceStruct) Authenticate(authorizationPayload AuthorizationDTO) (*map[string]string, common.CustomError) {
 
 	userID := ""
 
-	if authorizationPayload.Email != "root@gmail.com" || authorizationPayload.Password != "root" {
-		return map[string]string{}, common.NewUnauthorizedError("Credenciais inválidas")
+	if authorizationPayload.Email == "root@gmail.com" || authorizationPayload.Password == "root" {
+		userID = "root"
 	}
-	userID = "root"
+
+	hashedPassword := utils.GetMd5(authorizationPayload.Password)
+
+	savedUser, savedErr := u.userRepository.GetByCredentials(authorizationPayload.Email, hashedPassword)
+
+	if savedErr != nil {
+		return nil, common.NewUnauthorizedError("Bad credentials")
+	}
+
+	userID = strconv.Itoa(savedUser.ID)
 
 	ts, err := CreateToken(userID)
 	if err != nil {
-		return map[string]string{}, common.NewInternalServerError(err.Error(), err)
+		return nil, common.NewInternalServerError(err.Error(), err)
 	}
 
 	saveErr := CreateAuth(userID, ts, u.broker)
 	if saveErr != nil {
-		return map[string]string{}, common.NewInternalServerError(err.Error(), saveErr)
+		return nil, common.NewInternalServerError(err.Error(), saveErr)
 	}
 
 	tokens := map[string]string{
@@ -91,7 +99,7 @@ func (u *serviceStruct) Authenticate(authorizationPayload AuthorizationDTO) (map
 		"refresh_token": ts.RefreshToken,
 	}
 
-	return tokens, nil
+	return &tokens, nil
 
 }
 

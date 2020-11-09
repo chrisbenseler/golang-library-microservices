@@ -11,6 +11,7 @@ type UserRepository interface {
 	Save(*User) (*User, common.CustomError)
 	Get(int) (*User, common.CustomError)
 	GetByEmail(string) (*User, common.CustomError)
+	GetByCredentials(string, string) (*User, common.CustomError)
 }
 
 type userRepositoryStruct struct {
@@ -79,4 +80,19 @@ func (r *userRepositoryStruct) GetByEmail(email string) (*User, common.CustomErr
 
 	return user, nil
 
+}
+
+//GetByCredentials get a user credentials
+func (r *userRepositoryStruct) GetByCredentials(email string, password string) (*User, common.CustomError) {
+	user := NewUser("", "")
+
+	row := r.db.QueryRow(`SELECT id, email FROM user WHERE email=$1 AND password=$2`, email, password)
+
+	err := row.Scan(&user.ID, &user.Email)
+
+	if err != nil {
+		return nil, common.NewNotFoundError("No user found for the given email")
+	}
+
+	return user, nil
 }
