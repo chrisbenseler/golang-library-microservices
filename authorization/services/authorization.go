@@ -36,12 +36,15 @@ func NewAuthorizationService(userRepository domain.UserRepository, broker common
 //CreateUser create a new user
 func (u *serviceStruct) CreateUser(userDTO UserDTO) (*domain.User, common.CustomError) {
 
-	type BrokerUser struct {
-		Email string
-	}
-
 	if len(userDTO.Password) < 6 {
 		return nil, common.NewBadRequestError("Invalid password")
+	}
+
+	existingUser, existinUserError := u.userRepository.GetByEmail(userDTO.Email)
+
+	fmt.Println(existinUserError)
+	if existingUser != nil {
+		return nil, common.NewBadRequestError("User already exists")
 	}
 
 	user := domain.NewUser(userDTO.Email, utils.GetMd5(userDTO.Password))
@@ -56,7 +59,6 @@ func (u *serviceStruct) CreateUser(userDTO UserDTO) (*domain.User, common.Custom
 
 	cmd := u.broker.Publish("authorization.signup", b)
 
-	fmt.Print(cmd)
 	return savedUser, nil
 
 }
