@@ -7,6 +7,7 @@ import (
 	"librarymanager/authorization/domain"
 	"librarymanager/authorization/utils"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -54,10 +55,12 @@ func (u *serviceStruct) CreateUser(userDTO UserDTO) (*domain.User, common.Custom
 		return nil, err
 	}
 
-	payload := common.BrokerPayloadDTO{ID: savedUser.ID, Extra: savedUser.Email}
+	payload := common.BrokerPayloadDTO{ID: strconv.Itoa(savedUser.ID), Extra: savedUser.Email}
 	b, _ := json.Marshal(payload)
 
 	cmd := u.broker.Publish("authorization.signup", b)
+
+	fmt.Println(cmd)
 
 	return savedUser, nil
 
