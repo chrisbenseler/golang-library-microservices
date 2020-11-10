@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"librarymanager/users/common"
+	"librarymanager/users/controllers"
 	"librarymanager/users/domain"
 	"librarymanager/users/services"
 
@@ -42,6 +43,12 @@ func main() {
 		})
 	})
 
-	router.Run(":3001")
+	usersController := controllers.NewUsersController(usersService)
+
+	apiRoutes := controllers.MapUrls(router, usersController)
+
+	apiRoutes.Use(cors.New(config))
+
+	router.Run(":3000")
 
 }

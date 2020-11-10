@@ -43,7 +43,7 @@ func (r *repositoryStruct) Get(id int) (*User, common.CustomError) {
 
 	row := r.db.QueryRow(`SELECT id, fullName, email FROM user WHERE id=$1`, id)
 
-	err := row.Scan(&user.ID, &user.Email, &user.FullName)
+	err := row.Scan(&user.ID, &user.FullName, &user.Email)
 
 	if err != nil {
 		return nil, common.NewNotFoundError("No user found for the given ID")

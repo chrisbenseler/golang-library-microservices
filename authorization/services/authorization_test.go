@@ -54,15 +54,18 @@ func Test_Authorization_Auth(t *testing.T) {
 	}
 	td, err := service.Authenticate(authorizationPayload)
 
+	r := *td //
+
 	if err != nil {
 		t.Error("Error when authenticate root")
 	}
 
-	token := td["access_token"]
+	token := r["access_token"]
 
 	if len(token) == 0 {
 		t.Error("Invalid access token")
 	}
+
 }
 
 type MockBroker struct {
@@ -87,5 +90,17 @@ type MockUserRepository struct {
 }
 
 func (r *MockUserRepository) Save(user *domain.User) (*domain.User, common.CustomError) {
+	return nil, nil
+}
+
+func (r *MockUserRepository) Get(id int) (*domain.User, common.CustomError) {
+	return nil, nil
+}
+
+func (r *MockUserRepository) GetByCredentials(email string, password string) (*domain.User, common.CustomError) {
+	return &domain.User{ID: 20, Email: "teste@gmail.com"}, nil
+}
+
+func (r *MockUserRepository) GetByEmail(email string) (*domain.User, common.CustomError) {
 	return nil, nil
 }

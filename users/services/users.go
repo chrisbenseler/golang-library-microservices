@@ -11,7 +11,7 @@ import (
 //Users users service interface
 type Users interface {
 	Subscriptions()
-	//Create(string, string) (*domain.User, common.CustomError)
+	GetByID(int) (*domain.User, common.CustomError)
 }
 
 type serviceStruct struct {
@@ -52,9 +52,7 @@ func (u *serviceStruct) Subscriptions() {
 
 }
 
-/*
-func (u *serviceStruct) Create(email string, fullName string) (*domain.User, common.CustomError) {
-
-	return u.userRepository.Save(0, email, fullName)
+//GetByID method
+func (u *serviceStruct) GetByID(id int) (*domain.User, common.CustomError) {
+	return u.userRepository.Get(id)
 }
-*/
